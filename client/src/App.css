@@ -1,0 +1,167 @@
+/* ===== PERUSASETUKSET ===== */
+
+:root {
+  --primary-color: #e30613;
+  --primary-hover: #b3050f;
+  --bg-color: #f8fafc;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --panel-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.1),
+            0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+/* ===== APP ===== */
+
+.App {
+  min-height: 100vh;
+}
+
+/* ===== KAKSI PANEELIA VIEREKKÄIN ===== */
+
+.two-column {
+  display: flex;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+  align-items: stretch;
+}
+
+/* Molemmat sarakkeet */
+.two-column > div {
+  flex: 1;
+  display: flex;
+}
+
+/* ===== PANEL ===== */
+
+.panel {
+  background: var(--panel-bg);
+  border-radius: 12px;
+  padding: 1.75rem 2rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Otsikko */
+.panel-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem 0;
+  color: var(--text-main);
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.panel-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 60px;
+  height: 3px;
+  background: var(--primary-color);
+}
+
+/* ===== LISTAT ===== */
+
+.panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.panel li {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  position: relative;
+  color: var(--text-muted);
+}
+
+.panel li::before {
+  content: "•";
+  color: var(--primary-color);
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+/* ===== INPUTIT ===== */
+
+input[type="email"],
+input[type="text"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+input[type="text"] {
+  background: #f8fafc;
+  border-style: dashed;
+}
+
+input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(227, 6, 19, 0.12);
+  outline: none;
+}
+
+/* ===== NAPIT ===== */
+
+button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* ===== TEKSTIT ===== */
+
+.help-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+}
+
+p {
+  margin-top: 1rem;
+}
+
+/* ===== MOBIILI ===== */
+
+@media (max-width: 768px) {
+  .two-column {
+    flex-direction: column;
+  }
+}
