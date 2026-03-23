@@ -19,8 +19,7 @@ function App() {
     localStorage.getItem('isAuthenticated') === 'true'
   );
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
+  const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
   // Lähetään OTP-pyyntö backendille
   const generateOtp = async () => {
     const trimmedEmail = email.trim();
