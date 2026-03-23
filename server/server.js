@@ -21,8 +21,8 @@ const startServer = async () => {
   try{
   await connectDB();
   // Käynnistetään  Express-palvelin
-  app.listen(port, () => {
-    console.log(`Server käynnissä → http://localhost:${port}`);
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Server käynnissä → http://0.0.0.0:${port}`);
   });
 
   } catch (err) {
