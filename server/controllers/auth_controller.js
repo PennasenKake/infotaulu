@@ -1,8 +1,10 @@
-
 const otpGenerator = require('otp-generator');
-const nodemailer = require('nodemailer'); // Sähköpostin lähettäminen
+const { Resend } = require('resend');     // Resend SDK
 const Otp = require('../models/otp');     // Mongoose-malli otp-tietueille
 const { isEmailWhitelisted } = require('../utils/whitelist'); // Sallittujen sähköpostien tarkistus
+
+// Alusta Resend kerran moduulin alussa (käyttää ympäristömuuttujaa)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const generateOTP = async (req, res) => {
   const { email } = req.body;
@@ -31,20 +33,11 @@ const generateOTP = async (req, res) => {
     // Tallennetaan uusi otp tietokantaan
     await Otp.create({ email, otp });
 
-    // Sähköpostin lähetysasetukset
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    // Lähetetävä sähköposti
-    await transporter.sendMail({
-      from: '"Info-taulu – Älä vastaa" <tauluinfo1@gmail.com>',
+    //  Lähetä sähköposti Resendillä (HTTPS API, ei SMTP:ää)
+    await resend.emails.send({
+      from: 'Infotaulu <onboarding@resend.dev>',   // Resend default 
       to: email,
-      replyTo: 'no-reply@noreply.com',  // Estää turhat vastaukset
+      replyTo: 'no-reply@noreply.com',              // Estää turhat vastaukset 
       subject: 'Kertakäyttökoodi infotaululle',
       text: `Hei!\n\nKäytä tätä koodia: ${otp}\n\nKoodi vanhenee 5 minuutissa.\n\nÄLÄ VASTAA TÄHÄN VIESTIIN.`,
       html: `
@@ -65,7 +58,7 @@ const generateOTP = async (req, res) => {
   }
 };
 
-// Varmistaa OTP:n oikeellisuuden
+// Varmistaa OTP:n oikeellisuuden N
 const verifyOTP = async (req, res) => {
   let { email, otp } = req.body;
   // Normalisointi
