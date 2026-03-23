@@ -12,7 +12,7 @@ function Dashboard({ onLogout }) {
 
   useEffect(() => {
     fetchFiles();
-  }, [fetchFiles]);
+  }, []);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
