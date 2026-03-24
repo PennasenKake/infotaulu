@@ -41,7 +41,7 @@ function App() {
       const timeout = setTimeout(() => {
         handleLogout();
         alert('Sessio on vanhentunut');
-      }, 15 * 60 * 1000); // 15 minuuttia
+      }, 3 * 60 * 1000); // 15 minuuttia
 
       return () => clearTimeout(timeout);
        
