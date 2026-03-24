@@ -54,7 +54,7 @@ function App() {
     const timeout = setTimeout(() => {
       handleLogout();
       alert('Sessio on vanhentunut (15 minuuttia). Kirjaudu uudelleen sisään.');
-    }, 3 * 60 * 1000);
+    }, 10 * 60 * 1000);
 
     // Tallenna kirjautumisaika
     localStorage.setItem('loginTime', now.toString());
