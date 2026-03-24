@@ -35,18 +35,32 @@ function App() {
     }
   }, []);
 
-  // 15 minuutin automaattinen uloskirjautuminen
+  
+  // 15 minuutin automaattinen uloskirjautuminen JA refreshauksen tarkistus
   useEffect(() => {
     if (!isAuthenticated || !token) return;
 
-      const timeout = setTimeout(() => {
-        handleLogout();
-        alert('Sessio on vanhentunut');
-      }, 3 * 60 * 1000); // 15 minuuttia
+    const loginTime = localStorage.getItem('loginTime');
+    const now = Date.now();
 
-      return () => clearTimeout(timeout);
-       
-    }, [isAuthenticated, token]);
+    // Jos loginTime on vanhempi kuin 15 minuuttia -> kirjaa ulos heti
+    if (loginTime && now - parseInt(loginTime) > 15 * 60 * 1000) {
+      handleLogout();
+      alert('Sessio on vanhentunut. Kirjaudu uudelleen.');
+      return;
+    }
+
+    // Aseta uusi timeout
+    const timeout = setTimeout(() => {
+      handleLogout();
+      alert('Sessio on vanhentunut (15 minuuttia). Kirjaudu uudelleen sisään.');
+    }, 3 * 60 * 1000);
+
+    // Tallenna kirjautumisaika
+    localStorage.setItem('loginTime', now.toString());
+
+    return () => clearTimeout(timeout);
+  }, [isAuthenticated, token]);
 
   // Lähetään OTP-pyyntö backendille
   const generateOtp = async () => {
