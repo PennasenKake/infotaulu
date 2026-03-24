@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 import Login from './login';
@@ -14,12 +14,39 @@ function App() {
   const [response, setResponse] = useState(''); // Käyttäjälle näytetään ilmoitus
   const [isLoading, setIsLoading] = useState(false);  // Estää tuplaklickkauksia  
 
-  // Tarkistetaan localStorage:ssa onko kirjautunut
+  // Autentikointi
   const [isAuthenticated, setIsAuthenticated] = useState(
     localStorage.getItem('isAuthenticated') === 'true'
   );
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
+  
+  // Tarkista localStorage käynnistyksessä
+  useEffect(() => {
+
+    const savedToken = localStorage.getItem('token');
+    const savedEmail = localStorage.getItem('authenticatedEmail');
+
+    if (savedToke && savedEmail) {
+      setEmail(savedToken);
+      setIsAuthenticated(true);
+      setEmail(savedEmail);
+    }
+  }, []);
+
+  // 15 minuutin automaattinen uloskirjautuminen
+  useEffect(() => {
+    if (!isAuthenticated || !token) return;
+
+      const timeout = setTimeout(() => {
+        handleLogout();
+        alert('Sessio on vanhentunut');
+      }, 15 * 60 * 1000); // 15 minuuttia
+
+      return () => clearTimeout(timeout);
+       
+    }, [isAuthenticated, token]);
+
   // Lähetään OTP-pyyntö backendille
   const generateOtp = async () => {
     const trimmedEmail = email.trim();
@@ -89,12 +116,14 @@ function App() {
         setResponse('Kirjautuminen onnistui!');
 
         // Tallennetaan localStorageen
-        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('token', data.token);
         localStorage.setItem('authenticatedEmail', trimmedEmail);
+
+        setToken(data.token);
         setIsAuthenticated(true);
+
         // Viive, käyttäjä ehtii nähdä viestin
-        setTimeout(() => {
-          navigate('/dashboard');
+        setTimeout(() => { navigate('/dashboard');
         }, 1200);
       } else {
         setResponse(data.error || 'Virheellinen tai vanhentunut koodi');
@@ -106,6 +135,8 @@ function App() {
       setIsLoading(false);
     }
   };
+
+
 
   // Kirjautuu ulos ja siivoaa tilamuuttujat
   const handleLogout = () => {
@@ -119,46 +150,35 @@ function App() {
   };
 
 
+
   // Reititys - suojaa dashboard vain kirjautuneilta
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          isAuthenticated ? (
-            // jos jo kirjautunut, ohjataan dashboardiin
-            <Navigate to="/dashboard" replace />
+      <Route path="/" element={ isAuthenticated ? (
+            <Navigate to="/dashboard" replace/>
           ) : (
-            <Login
-              email={email}
-              setEmail={setEmail}
-              otp={otp}
-              setOtp={setOtp}
-              generateOtp={generateOtp}
-              verifyOtp={verifyOtp}
-              response={response}
-              isLoading={isLoading}
+            <Login email={email} setEmail={setEmail} otp={otp}
+              setOtp={setOtp} generateOtp={generateOtp} verifyOtp={verifyOtp}
+              response={response} isLoading={isLoading}
             />
           )
         }
       />
 
-      <Route
-        path="/dashboard"
-        element={
-          isAuthenticated ? (
-            <Dashboard onLogout={handleLogout} />
-          ) : (
-            // jos ei ole kirjautunut, ohjataan loginiin
-            <Navigate to="/" replace />
-          )
-        }
-      />
-
-      {/* Mahdollinen 404 */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/dashboard" element={
+        isAuthenticated ? (
+          <Dashboard onLogout={handleLogout} token={token} />
+        ) : (
+        <Navigate to="/" replace />
+      )
+    }
+  />
+  
+    <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
+          
+
 
 export default App;

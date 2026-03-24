@@ -2,6 +2,7 @@ const otpGenerator = require('otp-generator');
 const { Resend } = require('resend');     // Resend SDK
 const Otp = require('../models/otp');     // Mongoose-malli otp-tietueille
 const { isEmailWhitelisted } = require('../utils/whitelist'); // Sallittujen sähköpostien tarkistus
+const jwt = require('jsonwebtoken');
 
 // Alusta Resend kerran moduulin alussa (käyttää ympäristömuuttujaa)
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -78,7 +79,10 @@ const verifyOTP = async (req, res) => {
 
     // Poistetaan koodi tietokannasta käytön jälkeen
     await Otp.deleteOne({ _id: record._id });
-    return res.json({ message: 'Koodi hyväksytty', success: true });
+
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+    return res.json({ message: 'Koodi hyväksytty', success: true, token: token });
   } catch (err) {
     console.error('verify-otp error:', err);
     return res.status(500).json({ error: 'Palvelinvirhe' });

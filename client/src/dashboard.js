@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-function Dashboard({ onLogout }) {
+
+function Dashboard({ onLogout, token }) {
   const email = localStorage.getItem('authenticatedEmail') || 'Tuntematon käyttäjä';
 
   const [file, setFile] = useState(null);
@@ -81,6 +82,9 @@ function Dashboard({ onLogout }) {
     try {
       const res = await fetch(`${API_URL}/api/upload/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (!res.ok) {
@@ -142,7 +146,7 @@ function Dashboard({ onLogout }) {
               </p>
             )}
 
-            {/* 📂 Tiedostolista */}
+            {/* Tiedostolista */}
             <table style={{ marginTop: '2rem', width: '100%' }}>
               <thead>
                 <tr>
