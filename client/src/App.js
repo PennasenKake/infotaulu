@@ -15,9 +15,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);  // Estää tuplaklickkauksia  
 
   // Autentikointi
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    localStorage.getItem('isAuthenticated') === 'true'
-  );
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [token, setToken] = useState(null); 
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
   
