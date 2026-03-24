@@ -9,7 +9,10 @@ const uploadRoutes = require('./routes/upload_routes'); // Tiedoston lataus reit
 const app = express();
 const port = process.env.PORT || 5000; 
 
-app.use(cors({ origin: process.env.CLIENT_URL }));
+app.use(cors({
+  origin: process.env.CLIENT_URL,   
+  credentials: true
+}));
 app.use(express.json());
 
 // API-Reitit
