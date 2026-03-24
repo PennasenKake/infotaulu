@@ -20,6 +20,8 @@ function App() {
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
   
+
+  
   // Tarkista localStorage käynnistyksessä
   useEffect(() => {
 
@@ -119,6 +121,8 @@ function App() {
         localStorage.setItem('authenticatedEmail', trimmedEmail);
 
         setToken(data.token);
+
+        localStorage.setItem('loginTime', Date.now().toString());
         setIsAuthenticated(true);
 
         // Viive, käyttäjä ehtii nähdä viestin
@@ -134,6 +138,16 @@ function App() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const loginTime = localStorage.getItem('loginTime');
+    if (loginTime) {
+      const elapsed = Date.now() - parseInt(loginTime);
+      if (elapsed > 15 * 60 * 1000) {   // 15 minuuttia
+        handleLogout();
+      }
+    }
+  }, []);
 
 
 
