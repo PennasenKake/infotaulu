@@ -36,14 +36,14 @@ function App() {
   }, []);
 
   
-  // 15 minuutin automaattinen uloskirjautuminen JA refreshauksen tarkistus
+  // 10 minuutin automaattinen uloskirjautuminen JA refreshauksen tarkistus
   useEffect(() => {
     if (!isAuthenticated || !token) return;
 
     const loginTime = localStorage.getItem('loginTime');
     const now = Date.now();
 
-    // Jos loginTime on vanhempi kuin 15 minuuttia -> kirjaa ulos heti
+    // Jos loginTime on vanhempi kuin 10 minuuttia -> kirjaa ulos heti
     if (loginTime && now - parseInt(loginTime) > 15 * 60 * 1000) {
       handleLogout();
       alert('Sessio on vanhentunut. Kirjaudu uudelleen.');
