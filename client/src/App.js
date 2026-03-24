@@ -26,7 +26,7 @@ function App() {
     const savedToken = localStorage.getItem('token');
     const savedEmail = localStorage.getItem('authenticatedEmail');
 
-    if (savedTokeN && savedEmail) {
+    if (savedToken && savedEmail) {
       setEmail(savedToken);
       setIsAuthenticated(true);
       setEmail(savedEmail);
