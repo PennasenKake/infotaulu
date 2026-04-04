@@ -8,10 +8,10 @@ const connectDB = async () => {
   try {
     // Yhdistetään Mongooseen
     const conn = await mongoose.connect(process.env.MONGO_URI);
-    console.log(`MongoDB connected → ${conn.connection.host}`);
+    console.log(`MongoDB connected -> ${conn.connection.host}`);
 
     // Alustetaan GridFSBucket samalle tietokantayhteydelle
-    //    → bucketName 'uploads' → tiedostot tallentuvat kokoelmiin:
+    //    -> bucketName 'uploads' ->  tiedostot tallentuvat kokoelmiin:
     //      - uploads.files
     //      - uploads.chunks
     gridFSBucket = new GridFSBucket(conn.connection.db, {

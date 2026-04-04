@@ -17,7 +17,7 @@ const uploadFile = async (req, res) => {
     const bucket = getGridFSBucket();
 
     //  Aloitetaan GridFS-tallennus
-    //    → openUploadStream palauttaa stream-olion, joka generoi oman ObjectId:n
+    //  openUploadStream palauttaa stream-olion, joka generoi oman ObjectId:n
     const uploadStream = bucket.openUploadStream(req.file.originalname, {
       contentType: req.file.mimetype,
     });

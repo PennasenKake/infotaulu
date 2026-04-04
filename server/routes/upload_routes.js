@@ -7,6 +7,7 @@ const { uploadFile } = require('../controllers/upload_controller');
 
 const { listFiles, deleteFile } = require('../controllers/upload_controller');
 
+const { authenticateToken } = require('../middleware/auth');
 
 // Käytetään memoryStoragea
 const storage = multer.memoryStorage();
@@ -26,12 +27,12 @@ const upload = multer({
   }
 });
 
+//authenticateToken
+router.get('/',authenticateToken, listFiles); // hakee tiedostot
 
-router.get('/', listFiles);
+router.post('/',authenticateToken, upload.single('file'), uploadFile); // lataa tiedoston
 
-router.post('/', upload.single('file'), uploadFile);
-
-router.delete('/:id', deleteFile);
+router.delete('/:id',authenticateToken, deleteFile); // poistaa tiedoston pysyvästi
 
 
 
