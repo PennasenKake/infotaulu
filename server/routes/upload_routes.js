@@ -2,38 +2,28 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 
-// Tuodaan lataus logiikka
-const { uploadFile } = require('../controllers/upload_controller');
-
-const { listFiles, deleteFile } = require('../controllers/upload_controller');
-
+const { uploadFile, listFiles, deleteFile } = require('../controllers/upload_controller');
 const { authenticateToken } = require('../middleware/auth');
 
-// Käytetään memoryStoragea
+// Multer-asetukset
 const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
-  limits: {
-    fileSize: 50 * 1024 * 1024,     // Maksimi 50 megatavua
-  },
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    // Tarkistetaan tiedostotyyppi
-    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4'];    if (allowedTypes.includes(file.mimetype)) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4'];
+    if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Vain kuvat ja PDF-tiedostot sallittu'), false);
+      cb(new Error('Vain JPG, PNG ja MP4-tiedostot ovat sallittuja'), false);
     }
   }
 });
 
-//authenticateToken
-router.get('/',authenticateToken, listFiles); // hakee tiedostot
-
-router.post('/',authenticateToken, upload.single('file'), uploadFile); // lataa tiedoston
-
-router.delete('/:id',authenticateToken, deleteFile); // poistaa tiedoston pysyvästi
-
-
+// Suojatut reitit
+router.get('/', authenticateToken, listFiles);
+router.post('/', authenticateToken, upload.single('file'), uploadFile);
+router.delete('/:id', authenticateToken, deleteFile);
 
 module.exports = router;
