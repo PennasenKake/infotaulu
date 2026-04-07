@@ -41,7 +41,7 @@ export default function Login({email, setEmail, otp, setOtp, generateOtp, verify
               disabled={isLoading}
             />
             <button onClick={generateOtp} disabled={isLoading}>
-              {isLoading ? 'Lähetetään...' : 'Luo Kertokäyttökoodi'}
+              {isLoading ? 'Lähetetään...' : 'Luo Kertakäyttökoodi'}
             </button>
 
             <input type="text" placeholder="Kertakäyttökoodi" value={otp} onChange={(e) => setOtp(e.target.value)} disabled={isLoading} />
