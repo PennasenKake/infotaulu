@@ -28,6 +28,11 @@ function Dashboard({ onLogout, token }) {
       return;
     }
 
+    if (!token) {
+      setMessage('Kirjaudu ensin sisään');
+      return;
+    }
+
     setIsUploading(true);
     setMessage('');
 
@@ -38,7 +43,9 @@ function Dashboard({ onLogout, token }) {
     try {
       const res = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: {
+          'Authorization': `Bearer ${token}`   
+        },
         body: formData,
       });
 
@@ -48,11 +55,12 @@ function Dashboard({ onLogout, token }) {
         throw new Error(data.error || 'Lataus epäonnistui');
       }
 
-      setMessage(`Onnistui! Tiedosto: ${data.file.originalName}`);
+      setMessage(`Onnistui! Tiedosto: ${data.file?.originalName || 'tiedosto'}`);
       setFile(null);
-      fetchFiles();
+      fetchFiles();        // Päivitä lista
 
     } catch (err) {
+      console.error(err);
       setMessage(`Virhe: ${err.message}`);
     } finally {
       setIsUploading(false);
@@ -94,7 +102,7 @@ function Dashboard({ onLogout, token }) {
       }
 
       setMessage('Tiedosto poistettu onnistuneesti');
-      fetchFiles(); // Päivitä lista
+      fetchFiles(); 
     } catch (err) {
       setMessage(`Virhe poistossa: ${err.message}`);
     }
