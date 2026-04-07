@@ -38,6 +38,7 @@ function Dashboard({ onLogout, token }) {
     try {
       const res = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
       });
 

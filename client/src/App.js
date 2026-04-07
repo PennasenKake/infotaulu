@@ -29,7 +29,7 @@ function App() {
     const savedEmail = localStorage.getItem('authenticatedEmail');
 
     if (savedToken && savedEmail) {
-      setEmail(savedToken);
+      setToken(savedToken);
       setIsAuthenticated(true);
       setEmail(savedEmail);
     }
@@ -169,6 +169,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('authenticatedEmail');
+    localStorage.removeItem('loginTime');  
     setIsAuthenticated(false);
     setEmail('');
     setOtp('');
