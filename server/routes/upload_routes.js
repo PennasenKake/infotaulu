@@ -22,8 +22,8 @@ const upload = multer({
 });
 
 // Suojatut reitit
-router.get('/', authenticateToken, listFiles);
-router.post('/', authenticateToken, upload.single('file'), uploadFile);
-router.delete('/:id', authenticateToken, deleteFile);
+router.get('/', authenticate, listFiles);
+router.post('/', authenticate, upload.single('file'), uploadFile);
+router.delete('/:id', authenticate, deleteFile);
 
 module.exports = router;
