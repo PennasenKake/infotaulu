@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 
 const { uploadFile, listFiles, deleteFile } = require('../controllers/upload_controller');
-const { authenticate } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 
 // Multer asetukset
 const storage = multer.memoryStorage();
@@ -22,8 +22,8 @@ const upload = multer({
 });
 
 // Suojatut reitit
-router.get('/', authenticate, listFiles);
-router.post('/', authenticate, upload.single('file'), uploadFile);
-router.delete('/:id', authenticate, deleteFile);
+router.get('/', authenticateToken, listFiles);
+router.post('/', authenticateToken, upload.single('file'), uploadFile);
+router.delete('/:id', authenticateToken, deleteFile);
 
 module.exports = router;
