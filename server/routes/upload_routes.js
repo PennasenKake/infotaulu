@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 
 const { uploadFile, listFiles, deleteFile } = require('../controllers/upload_controller');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 
 // Multer asetukset
 const storage = multer.memoryStorage();
