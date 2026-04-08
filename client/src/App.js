@@ -77,7 +77,15 @@ function App() {
 
       if (res.ok) {
         setResponse(data.message || 'Koodi lähetetty onnistuneesti!');
-      } else {
+      }
+      else if (res.status === 429) {
+      // Rate limit -virhe
+      setResponse({ 
+        type: 'error', 
+        text: '⏳ Liian monta OTP-pyyntöä. Odota 10 minuuttia ennen uutta yritystä.' 
+      });
+      } 
+      else {
         setResponse(data.error || 'Virhe OTP:n luonnissa');
       }
     } catch (err) {
