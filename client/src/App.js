@@ -38,7 +38,7 @@ function App() {
     const now = Date.now();
 
     // Jos istunto on jo vanhentunut refreshauksen yhteydessä
-    if (loginTime && now - parseInt(loginTime) > 15 * 60 * 1000) {
+    if (loginTime && now - parseInt(loginTime) > 10 * 60 * 1000) {
       handleLogout();
       alert('Sessio on vanhentunut. Kirjaudu uudelleen.');
       return;
@@ -47,8 +47,8 @@ function App() {
     // Aseta uusi timeout
     const timeout = setTimeout(() => {
       handleLogout();
-      alert('Sessio on vanhentunut (15 minuuttia). Kirjaudu uudelleen sisään.');
-    }, 15 * 60 * 1000);   // ← 15 minuuttia
+      alert('Sessio on vanhentunut (10 minuuttia). Kirjaudu uudelleen sisään.');
+    }, 10 * 60 * 1000);   // ← 10 minuuttia
 
     // Tallenna kirjautumisaika
     localStorage.setItem('loginTime', now.toString());
