@@ -68,30 +68,44 @@ function Dashboard({ onLogout, token }) {
   };
 
 
-    const fetchFiles = async () => {
-    try {
-      const token = localStorage.getItem('token');
+  const fetchFiles = async () => {
+    if (!token) return;
 
-      if (!token) {
-        setMessage('Istunto vanhentunut – kirjaudu uudelleen sisään.');
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`${API_URL}/api/upload`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // 🔐 Jos token on vanhentunut tai virheellinen → logout heti
+      if (res.status === 401 || res.status === 403) {
         onLogout();
         return;
       }
 
-      const res = await fetch(`${API_URL}/api/upload`, {
-        emethod: 'GET',
-        headers:  {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      if (!res.ok) {
+        throw new Error('Tiedostojen haku epäonnistui');
+      }
 
-      if (!res.ok) throw new Error('Haku epäonnistui');
       const data = await res.json();
+
+      // Varmistetaan että saadaan taulukko
+      if (!Array.isArray(data)) {
+        throw new Error('Palvelin palautti virheellisen datan');
+      }
+
       setFiles(data);
+
     } catch (err) {
-      console.error('Tiedostojen haku epäonnistui:', err);
-      setMessage('Virhe tiedostojen haussa');
+      console.error('Virhe tiedostojen haussa:', err);
+      setError('Tiedostojen hakeminen epäonnistui. Yritä myöhemmin uudelleen.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
