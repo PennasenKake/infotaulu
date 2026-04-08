@@ -110,7 +110,7 @@ function App() {
     }
 
     setIsLoading(true);
-    setResponse('');
+    setResponse(null);
 
     try {
       const res = await fetch(`${API_URL}/api/auth/verify-otp`, {

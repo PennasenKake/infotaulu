@@ -20,7 +20,7 @@ const otpLimiter = rateLimit({
 // Reitit
 // -> Käyttäjä syöttää sähköpostin 
 // -> backend generoi OTP:n ja lähettää sen sähköpostilla
-router.post('/generate-otp', generateOTP);
+router.post('/generate-otp', otpLimiter, generateOTP);
 
 // -> Käyttäjä syöttää sähköpostin + saamansa 6-numeroisen koodin
 // -> backend tarkistaa koodin -> onnistuessa palauttaa onnistumisviestin
