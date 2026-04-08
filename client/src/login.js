@@ -1,6 +1,16 @@
 import React from 'react';
 
-export default function Login({email, setEmail, otp, setOtp, generateOtp, verifyOtp, response, isLoading,
+export default function Login({
+  email,
+  setEmail,
+  otp,
+  setOtp,
+  generateOtp,
+  verifyOtp,
+  response,
+  isLoading,
+  isRateLimited,          
+  setIsRateLimited        
 }) {
   return (
     <div className="App">
@@ -43,11 +53,30 @@ export default function Login({email, setEmail, otp, setOtp, generateOtp, verify
 
             <button 
               onClick={generateOtp} 
-              disabled={isLoading || isRateLimited}    >
-              {isRateLimited ? 'Odota 10 minuuttia...' : isLoading  ? 'Lähetetään...' : 'Luo Kertakäyttökoodi' }
+              disabled={isLoading || isRateLimited}
+            >
+              {isRateLimited 
+                ? 'Odota 10 minuuttia...' 
+                : isLoading 
+                  ? 'Lähetetään...' 
+                  : 'Luo Kertakäyttökoodi'
+              }
             </button>
 
-            <input type="text" placeholder="Kertakäyttökoodi" value={otp} onChange={(e) => setOtp(e.target.value)} disabled={isLoading} />
+            {response && (
+              <p className={`response-message ${response.type === 'error' ? 'error-text' : 'success-text'}`}>
+                {response.text}
+              </p>
+            )}
+
+            <input 
+              type="text" 
+              placeholder="Kertakäyttökoodi" 
+              value={otp} 
+              onChange={(e) => setOtp(e.target.value)} 
+              disabled={isLoading} 
+            />
+
             <button onClick={verifyOtp} disabled={isLoading}>
               {isLoading ? 'Tarkistetaan...' : 'Vahvista'}
             </button>

@@ -16,8 +16,8 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState(null);
 
+  // Rate limit -tila nappia varten
   const [isRateLimited, setIsRateLimited] = useState(false);
-
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
 
@@ -33,27 +33,24 @@ function App() {
     }
   }, []);
 
-  // 15 minuutin automaattinen uloskirjautuminen + refreshauksen tarkistus
+  // 10 minuutin automaattinen uloskirjautuminen + refreshauksen tarkistus
   useEffect(() => {
     if (!isAuthenticated || !token) return;
 
     const loginTime = localStorage.getItem('loginTime');
     const now = Date.now();
 
-    // Jos istunto on jo vanhentunut refreshauksen yhteydessä
     if (loginTime && now - parseInt(loginTime) > 10 * 60 * 1000) {
       handleLogout();
       alert('Sessio on vanhentunut. Kirjaudu uudelleen.');
       return;
     }
 
-    // Aseta uusi timeout
     const timeout = setTimeout(() => {
       handleLogout();
       alert('Sessio on vanhentunut (10 minuuttia). Kirjaudu uudelleen sisään.');
-    }, 10 * 60 * 1000);   // ← 10 minuuttia
+    }, 10 * 60 * 1000);
 
-    // Tallenna kirjautumisaika
     localStorage.setItem('loginTime', now.toString());
 
     return () => clearTimeout(timeout);
@@ -83,14 +80,14 @@ function App() {
           type: 'success', 
           text: data.message || 'Koodi lähetetty onnistuneesti!' 
         });
-        setIsRateLimited(false);  
+        setIsRateLimited(false);
       } 
       else if (res.status === 429) {
         setResponse({ 
           type: 'error', 
           text: '⏳ Liian monta OTP-pyyntöä. Odota 10 minuuttia ennen uutta yritystä.' 
         });
-        setIsRateLimited(true);    //  Aktivoi disable-tila napille
+        setIsRateLimited(true);
 
         // Poista disable automaattisesti 10 minuutin kuluttua
         setTimeout(() => {
@@ -119,11 +116,11 @@ function App() {
     const trimmedOtp = otp.trim();
 
     if (!trimmedEmail) {
-      setResponse('Syötä sähköpostiosoite');
+      setResponse({ type: 'error', text: 'Syötä sähköpostiosoite' });
       return;
     }
     if (!trimmedOtp || trimmedOtp.length !== 6) {
-      setResponse('Koodin täytyy olla tasan 6 merkkiä');
+      setResponse({ type: 'error', text: 'Koodin täytyy olla tasan 6 merkkiä' });
       return;
     }
 
@@ -140,7 +137,7 @@ function App() {
       const data = await res.json();
 
       if (res.ok && data.token) {
-        setResponse('Kirjautuminen onnistui!');
+        setResponse({ type: 'success', text: 'Kirjautuminen onnistui!' });
 
         localStorage.setItem('token', data.token);
         localStorage.setItem('authenticatedEmail', trimmedEmail);
@@ -151,10 +148,10 @@ function App() {
 
         setTimeout(() => navigate('/dashboard'), 1200);
       } else {
-        setResponse(data.error || 'Virheellinen tai vanhentunut koodi');
+        setResponse({ type: 'error', text: data.error || 'Virheellinen tai vanhentunut koodi' });
       }
     } catch (err) {
-      setResponse('Palvelinyhteysvirhe');
+      setResponse({ type: 'error', text: 'Palvelinyhteysvirhe' });
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -164,7 +161,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('authenticatedEmail');
-    localStorage.removeItem('loginTime');    
+    localStorage.removeItem('loginTime');
     setToken(null);
     setIsAuthenticated(false);
     setEmail('');
@@ -190,8 +187,8 @@ function App() {
               verifyOtp={verifyOtp}
               response={response}
               isLoading={isLoading}
-              isRateLimited={isRateLimited}          
-              setIsRateLimited={setIsRateLimited} 
+              isRateLimited={isRateLimited}           
+              setIsRateLimited={setIsRateLimited}     
             />
           )
         }
