@@ -10,14 +10,13 @@ function App() {
 
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [response, setResponse] = useState('');
+  const [response, setResponse] = useState(null);       
   const [isLoading, setIsLoading] = useState(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState(null);
+  const [isRateLimited, setIsRateLimited] = useState(false);   
 
-  // Rate limit -tila nappia varten
-  const [isRateLimited, setIsRateLimited] = useState(false);
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
 
@@ -33,7 +32,7 @@ function App() {
     }
   }, []);
 
-  // 10 minuutin automaattinen uloskirjautuminen + refreshauksen tarkistus
+  // 10 minuutin automaattinen uloskirjautuminen
   useEffect(() => {
     if (!isAuthenticated || !token) return;
 
@@ -42,7 +41,6 @@ function App() {
 
     if (loginTime && now - parseInt(loginTime) > 10 * 60 * 1000) {
       handleLogout();
-      alert('Sessio on vanhentunut. Kirjaudu uudelleen.');
       return;
     }
 
@@ -64,7 +62,7 @@ function App() {
     }
 
     setIsLoading(true);
-    setResponse('');
+    setResponse(null);
 
     try {
       const res = await fetch(`${API_URL}/api/auth/generate-otp`, {
@@ -76,10 +74,7 @@ function App() {
       const data = await res.json();
 
       if (res.ok) {
-        setResponse({ 
-          type: 'success', 
-          text: data.message || 'Koodi lähetetty onnistuneesti!' 
-        });
+        setResponse({ type: 'success', text: 'Koodi lähetetty onnistuneesti!' });
         setIsRateLimited(false);
       } 
       else if (res.status === 429) {
@@ -87,25 +82,15 @@ function App() {
           type: 'error', 
           text: '⏳ Liian monta OTP-pyyntöä. Odota 10 minuuttia ennen uutta yritystä.' 
         });
-        setIsRateLimited(true);
+        setIsRateLimited(true);                     
 
-        // Poista disable automaattisesti 10 minuutin kuluttua
-        setTimeout(() => {
-          setIsRateLimited(false);
-        }, 10 * 60 * 1000);
+        setTimeout(() => setIsRateLimited(false), 10 * 60 * 1000);
       } 
       else {
-        setResponse({ 
-          type: 'error', 
-          text: data.error || 'Virhe OTP:n luonnissa' 
-        });
+        setResponse({ type: 'error', text: data.error || 'Virhe OTP:n luonnissa' });
       }
     } catch (err) {
-      console.error(err);
-      setResponse({ 
-        type: 'error', 
-        text: 'Palvelinyhteysvirhe – onko backend käynnissä?' 
-      });
+      setResponse({ type: 'error', text: 'Palvelinyhteysvirhe' });
     } finally {
       setIsLoading(false);
     }
@@ -166,9 +151,11 @@ function App() {
     setIsAuthenticated(false);
     setEmail('');
     setOtp('');
-    setResponse('');
+    setResponse(null);
+    setIsRateLimited(false);          
     navigate('/');
   };
+
 
   return (
     <Routes>
