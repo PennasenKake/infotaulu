@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const rateLimit = require('express-rate-limit');
 
 
 const { connectDB } = require('./config/db'); // Yhteys tietokantaan
@@ -11,17 +10,6 @@ const uploadRoutes = require('./routes/upload_routes'); // Tiedoston lataus reit
 const app = express();
 const port = process.env.PORT || 5000; 
 
-const otpLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minuuttia
-  max: 5,                   // 5  kertaa yhteen aikaan
-  standardHeaders: true,    // Lisää RateLimit-info headeriin
-  legacyHeaders: false,
-  message: {
-    error: 'Liian monta pyyntöä, odota 10 minuuttia ennen uutta pyyntöä'
-  }
-});
-
-app.use('/api/auth/generate-otp', otpLimiter);
 
 
 app.use(cors({

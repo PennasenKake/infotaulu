@@ -16,6 +16,9 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState(null);
 
+  const [isRateLimited, setIsRateLimited] = useState(false);
+
+
   const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
 
   // Tarkista localStorage käynnistyksessä
@@ -64,7 +67,7 @@ function App() {
     }
 
     setIsLoading(true);
-    setResponse(null);   // Tyhjennä edellinen viesti
+    setResponse('');
 
     try {
       const res = await fetch(`${API_URL}/api/auth/generate-otp`, {
@@ -80,13 +83,19 @@ function App() {
           type: 'success', 
           text: data.message || 'Koodi lähetetty onnistuneesti!' 
         });
+        setIsRateLimited(false);  
       } 
       else if (res.status === 429) {
-        // Rate limit -virhe 
         setResponse({ 
           type: 'error', 
           text: '⏳ Liian monta OTP-pyyntöä. Odota 10 minuuttia ennen uutta yritystä.' 
         });
+        setIsRateLimited(true);    //  Aktivoi disable-tila napille
+
+        // Poista disable automaattisesti 10 minuutin kuluttua
+        setTimeout(() => {
+          setIsRateLimited(false);
+        }, 10 * 60 * 1000);
       } 
       else {
         setResponse({ 
