@@ -55,10 +55,12 @@ export default function Login({email, setEmail, otp, setOtp, generateOtp, verify
               {isLoading ? 'Tarkistetaan...' : 'Vahvista'}
             </button>
 
-            <p className={response.toLowerCase().includes('virhe') ? 'error-text' : ''}>
-              {response}
-            </p>
-
+            {response && (
+              <p className={`response-message ${response.type === 'error' ? 'error-text' : 'success-text'}`}>
+                {response.text}
+              </p>
+            )}
+            
             <p className="help-text">
               Ongelmia kirjautumisessa? Ota yhteyttä osaston ylläpitoon.
             </p>
