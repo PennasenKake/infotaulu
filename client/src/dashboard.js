@@ -71,11 +71,21 @@ function Dashboard({ onLogout, token }) {
     const fetchFiles = async () => {
     try {
       const token = localStorage.getItem('token');
+
+      if (!token) {
+        setMessage('Istunto vanhentunut – kirjaudu uudelleen sisään.');
+        onLogout();
+        return;
+      }
+
       const res = await fetch(`${API_URL}/api/upload`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+        emethod: 'GET',
+        headers:  {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+
       if (!res.ok) throw new Error('Haku epäonnistui');
       const data = await res.json();
       setFiles(data);
