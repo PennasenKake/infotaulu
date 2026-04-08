@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-
 function Dashboard({ onLogout, token }) {
   const email = localStorage.getItem('authenticatedEmail') || 'Tuntematon käyttäjä';
 
@@ -8,16 +7,19 @@ function Dashboard({ onLogout, token }) {
   const [files, setFiles] = useState([]);
   const [message, setMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);     
+  const [error, setError] = useState(null);              
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
 
   useEffect(() => {
     fetchFiles();
-  }, []);
+  }, [token]);   
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     setMessage('');
+    setError(null);
   };
 
   const handleSubmit = async (e) => {
@@ -35,6 +37,7 @@ function Dashboard({ onLogout, token }) {
 
     setIsUploading(true);
     setMessage('');
+    setError(null);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -44,7 +47,7 @@ function Dashboard({ onLogout, token }) {
       const res = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`   
+          'Authorization': `Bearer ${token}`
         },
         body: formData,
       });
@@ -52,12 +55,16 @@ function Dashboard({ onLogout, token }) {
       const data = await res.json();
 
       if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          onLogout();
+          return;
+        }
         throw new Error(data.error || 'Lataus epäonnistui');
       }
 
       setMessage(`Onnistui! Tiedosto: ${data.file?.originalName || 'tiedosto'}`);
       setFile(null);
-      fetchFiles();        // Päivitä lista
+      fetchFiles();
 
     } catch (err) {
       console.error(err);
@@ -66,7 +73,6 @@ function Dashboard({ onLogout, token }) {
       setIsUploading(false);
     }
   };
-
 
   const fetchFiles = async () => {
     if (!token) return;
@@ -78,29 +84,27 @@ function Dashboard({ onLogout, token }) {
       const res = await fetch(`${API_URL}/api/upload`, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
 
-      // 🔐 Jos token on vanhentunut tai virheellinen → logout heti
       if (res.status === 401 || res.status === 403) {
         onLogout();
         return;
       }
 
       if (!res.ok) {
-        throw new Error('Tiedostojen haku epäonnistui');
+        throw new Error('Haku epäonnistui');
       }
 
       const data = await res.json();
 
-      // Varmistetaan että saadaan taulukko
       if (!Array.isArray(data)) {
         throw new Error('Palvelin palautti virheellisen datan');
       }
 
       setFiles(data);
-
+      setMessage('');
     } catch (err) {
       console.error('Virhe tiedostojen haussa:', err);
       setError('Tiedostojen hakeminen epäonnistui. Yritä myöhemmin uudelleen.');
@@ -121,17 +125,20 @@ function Dashboard({ onLogout, token }) {
       });
 
       if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          onLogout();
+          return;
+        }
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || 'Poisto epäonnistui');
       }
 
       setMessage('Tiedosto poistettu onnistuneesti');
-      fetchFiles(); 
+      fetchFiles();
     } catch (err) {
       setMessage(`Virhe poistossa: ${err.message}`);
     }
   };
-
 
   return (
     <div className="App">
@@ -179,6 +186,8 @@ function Dashboard({ onLogout, token }) {
               </p>
             )}
 
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
             {/* Tiedostolista */}
             <table style={{ marginTop: '2rem', width: '100%' }}>
               <thead>
@@ -218,7 +227,6 @@ function Dashboard({ onLogout, token }) {
             >
               Kirjaudu ulos
             </button>
-
           </div>
         </div>
       </div>
