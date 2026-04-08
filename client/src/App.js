@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import Login from './login';
 import Dashboard from './dashboard';
-import { useAuth } from '../src/hooks/useAuth';
+import { useAuth } from './hooks/useAuth';
 
 function App() {
   const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
