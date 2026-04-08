@@ -190,6 +190,8 @@ function App() {
               verifyOtp={verifyOtp}
               response={response}
               isLoading={isLoading}
+              isRateLimited={isRateLimited}          
+              setIsRateLimited={setIsRateLimited} 
             />
           )
         }
