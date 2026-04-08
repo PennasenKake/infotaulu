@@ -59,12 +59,12 @@ function App() {
   const generateOtp = async () => {
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
-      setResponse('Syötä sähköpostiosoite');
+      setResponse({ type: 'error', text: 'Syötä sähköpostiosoite' });
       return;
     }
 
     setIsLoading(true);
-    setResponse('');
+    setResponse(null);   // Tyhjennä edellinen viesti
 
     try {
       const res = await fetch(`${API_URL}/api/auth/generate-otp`, {
@@ -76,21 +76,30 @@ function App() {
       const data = await res.json();
 
       if (res.ok) {
-        setResponse(data.message || 'Koodi lähetetty onnistuneesti!');
-      }
+        setResponse({ 
+          type: 'success', 
+          text: data.message || 'Koodi lähetetty onnistuneesti!' 
+        });
+      } 
       else if (res.status === 429) {
-      // Rate limit -virhe
-      setResponse({ 
-        type: 'error', 
-        text: '⏳ Liian monta OTP-pyyntöä. Odota 10 minuuttia ennen uutta yritystä.' 
-      });
+        // Rate limit -virhe 
+        setResponse({ 
+          type: 'error', 
+          text: '⏳ Liian monta OTP-pyyntöä. Odota 10 minuuttia ennen uutta yritystä.' 
+        });
       } 
       else {
-        setResponse(data.error || 'Virhe OTP:n luonnissa');
+        setResponse({ 
+          type: 'error', 
+          text: data.error || 'Virhe OTP:n luonnissa' 
+        });
       }
     } catch (err) {
-      setResponse('Palvelinyhteysvirhe – onko backend käynnissä?');
       console.error(err);
+      setResponse({ 
+        type: 'error', 
+        text: 'Palvelinyhteysvirhe – onko backend käynnissä?' 
+      });
     } finally {
       setIsLoading(false);
     }
