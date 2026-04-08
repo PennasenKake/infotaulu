@@ -13,14 +13,15 @@ const port = process.env.PORT || 5000;
 
 const otpLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minuuttia
-  max: 5, // 5  kertaa yhteen aikaan
-  standardHeaders: true,        // Lisää RateLimit-info headeriin
+  max: 5,                   // 5  kertaa yhteen aikaan
+  standardHeaders: true,    // Lisää RateLimit-info headeriin
   legacyHeaders: false,
   message: {
     error: 'Liian monta pyyntöä, odota 10 minuuttia ennen uutta pyyntöä'
   }
 });
-app.use('/api/auth/generate-otp', limiter);
+
+app.use('/api/auth/generate-otp', otpLimiter);
 
 
 app.use(cors({
@@ -33,7 +34,6 @@ app.use(express.json());
 app.use('/api/auth', authRoutes); // kirjautuminen
 app.use('/api/upload', uploadRoutes); // tiedoston lataus
 
-module.exports = {otpLimiter};
 
 // Palvelimen käynnistys 
 const startServer = async () => {
