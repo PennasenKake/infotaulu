@@ -33,6 +33,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes); // kirjautuminen
 app.use('/api/upload', uploadRoutes); // tiedoston lataus
 
+module.exports = {otpLimiter};
 
 // Palvelimen käynnistys 
 const startServer = async () => {
@@ -55,4 +56,3 @@ startServer().catch(err => {
   process.exit(1);
 });
 
-module.exports = {otpLimiter};
