@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const useAuth = (API_URL) => {
+    
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
