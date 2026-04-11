@@ -36,7 +36,7 @@ const generateOTP = async (req, res) => {
 
     //  Lähetä sähköposti Resendillä (HTTPS API, ei SMTP:ää)
     await resend.emails.send({
-      from: 'Infotaulu <onboarding@resend.dev>',   // Resend default 
+      from: 'Infotaulu <onboarding@sprinfotaulu.fi>',   // 
       to: email,
       replyTo: 'no-reply@noreply.com',              // Estää turhat vastaukset 
       subject: 'Kertakäyttökoodi infotaululle',

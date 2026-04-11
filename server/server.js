@@ -13,7 +13,8 @@ const port = process.env.PORT || 5000;
 const allowedOrigins = [
   'https://www.sprinfotaulu.fi',
   'https://sprinfotaulu.fi',
-  'https://infotaulu.up.railway.app',   // vanha, voidaan poistaa myöhemmin
+  'https://infotaulu.up.railway.app',   
+  'https://infotaulu-backend.up.railway.app',
 ];
 
 
