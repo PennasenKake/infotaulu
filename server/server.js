@@ -10,6 +10,11 @@ const uploadRoutes = require('./routes/upload_routes'); // Tiedoston lataus reit
 const app = express();
 const port = process.env.PORT || 5000; 
 
+const allowedOrigins = [
+  'https://www.sprinfotaulu.fi',
+  'https://sprinfotaulu.fi',
+  'https://infotaulu.up.railway.app',   // vanha, voidaan poistaa myöhemmin
+];
 
 
 app.use(cors({
