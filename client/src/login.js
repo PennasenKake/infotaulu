@@ -7,6 +7,8 @@ export default function Login({
   setOtp,
   generateOtp,
   verifyOtp,
+  isGenerating,     
+  isVerifying, 
   response,
   isLoading,
   isRateLimited,          

@@ -63,6 +63,7 @@ function Dashboard({ onLogout, token }) {
         throw new Error(data.error || 'Lataus epäonnistui');
       }
 
+      
       setMessage(`Onnistui! Tiedosto: ${data.file?.originalName || 'tiedosto'}`);
       setFile(null);
       fetchFiles();
@@ -81,6 +82,7 @@ function Dashboard({ onLogout, token }) {
     setIsLoading(true);
     setError(null);
 
+    
     try {
       const res = await fetch(`${API_URL}/api/upload`, {
         method: 'GET',
