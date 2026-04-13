@@ -59,7 +59,7 @@ export default function Login({
               <p className={`response-message ${response.type === 'error' ? 'error-text' : 'success-text'}`}>
                 {response.text}
               </p>
-              
+
             )}
 
             <input 
@@ -70,7 +70,7 @@ export default function Login({
               disabled={isLoading} 
             />
 
-            <button onClick={verifyOtp} disabled={isVerifying || isGenerating}>
+            <button onClick={verifyOtp} disabled={isVerifying} >
               {isVerifying ? 'Tarkistetaan...' : 'Vahvista'}
             </button>
 
