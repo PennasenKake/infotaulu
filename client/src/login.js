@@ -51,22 +51,15 @@ export default function Login({
               disabled={isLoading}
             />
 
-            <button 
-              onClick={generateOtp} 
-              disabled={isLoading || isRateLimited}
-            >
-              {isRateLimited 
-                ? 'Odota 10 minuuttia...' 
-                : isLoading 
-                  ? 'Lähetetään...' 
-                  : 'Luo Kertakäyttökoodi'
-              }
+            <button onClick={generateOtp} disabled={isGenerating || isRateLimited} >
+              { isRateLimited ? 'Odota 10 minuuttia...' : isGenerating ? 'Lähetetään...' : 'Luo Kertakäyttökoodi'}
             </button>
 
             {response && (
               <p className={`response-message ${response.type === 'error' ? 'error-text' : 'success-text'}`}>
                 {response.text}
               </p>
+              
             )}
 
             <input 
@@ -77,8 +70,8 @@ export default function Login({
               disabled={isLoading} 
             />
 
-            <button onClick={verifyOtp} disabled={isLoading}>
-              {isLoading ? 'Tarkistetaan...' : 'Vahvista'}
+            <button onClick={verifyOtp} disabled={isVerifying || isGenerating}>
+              {isVerifying ? 'Tarkistetaan...' : 'Vahvista'}
             </button>
 
             <p className="help-text">

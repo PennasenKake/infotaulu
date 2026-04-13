@@ -12,6 +12,9 @@ export const useAuth = (API_URL) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRateLimited, setIsRateLimited] = useState(false);
 
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState(null);
 
@@ -50,6 +53,7 @@ useEffect(() => {
   return () => clearTimeout(timeout);
 }, [isAuthenticated, token]);
 
+
   const generateOtp = async () => {
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
@@ -57,7 +61,7 @@ useEffect(() => {
       return;
     }
 
-    setIsLoading(true);
+    setIsGenerating(true);
     setResponse(null);
 
     try {
@@ -71,24 +75,18 @@ useEffect(() => {
 
       if (res.ok) {
         setResponse({ type: 'success', text: 'Koodi lähetetty onnistuneesti!' });
-        setIsRateLimited(false);
-      } 
-      else if (res.status === 429) {
+      } else if (res.status === 429) {
         setResponse({ 
           type: 'error', 
           text: '⏳ Liian monta OTP-pyyntöä. Odota 10 minuuttia ennen uutta yritystä.' 
         });
-        setIsRateLimited(true);                     
-
-        setTimeout(() => setIsRateLimited(false), 10 * 60 * 1000);
-      } 
-      else {
+      } else {
         setResponse({ type: 'error', text: data.error || 'Virhe OTP:n luonnissa' });
       }
     } catch (err) {
       setResponse({ type: 'error', text: 'Palvelinyhteysvirhe' });
     } finally {
-      setIsLoading(false);
+      setIsGenerating(false);
     }
   };
 
@@ -106,7 +104,7 @@ useEffect(() => {
       return;
     }
 
-    setIsLoading(true);
+    setIsVerifying(true);
     setResponse(null);
 
     try {
@@ -134,9 +132,8 @@ useEffect(() => {
       }
     } catch (err) {
       setResponse({ type: 'error', text: 'Palvelinyhteysvirhe' });
-      console.error(err);
     } finally {
-      setIsLoading(false);
+      setIsVerifying(false);
     }
   };
 
@@ -161,6 +158,8 @@ useEffect(() => {
     isLoading, setIsLoading,
     isRateLimited, setIsRateLimited,
     isAuthenticated,
+    isGenerating,          
+    isVerifying, 
     token,
     generateOtp,
     verifyOtp,
