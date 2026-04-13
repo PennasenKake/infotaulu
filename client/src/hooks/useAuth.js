@@ -30,7 +30,7 @@ export const useAuth = (API_URL) => {
     }
   }, []);
 
-  // 10 minuutin automaattinen uloskirjautuminen
+// 10 minuutin automaattinen uloskirjautuminen
 useEffect(() => {
   if (!isAuthenticated || !token) return;
 
@@ -151,6 +151,7 @@ useEffect(() => {
     navigate('/');
   };
 
+  // Palauta kaikki arvot
   return {
     email, setEmail,
     otp, setOtp,
