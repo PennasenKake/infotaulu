@@ -12,11 +12,11 @@ const upload = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024 }, // 50 Mt
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4' , 'application/pdf' ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Vain JPG, PNG ja MP4-tiedostot ovat sallittuja'), false);
+      cb(new Error('Vain JPG, PNG, PDF ja MP4-tiedostot ovat sallittuja'), false);
     }
   }
 });
