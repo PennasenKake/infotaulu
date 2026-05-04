@@ -9,6 +9,7 @@ function Dashboard({ onLogout, token }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);     
   const [error, setError] = useState(null);              
+  const [uploadProgress, setUploadProgress] = useState(0);
 
 //const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
   const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
@@ -38,6 +39,7 @@ function Dashboard({ onLogout, token }) {
 
     setIsUploading(true);
     setMessage('');
+    setUploadProgress(0);  
     setError(null);
 
     const formData = new FormData();
@@ -51,6 +53,10 @@ function Dashboard({ onLogout, token }) {
           'Authorization': `Bearer ${token}`
         },
         body: formData,
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(percentCompleted);
+        }
       });
 
       const data = await res.json();
@@ -178,9 +184,23 @@ function Dashboard({ onLogout, token }) {
                 onChange={handleFileChange}
                 disabled={isUploading}
               />
+
               <button disabled={!file || isUploading}>
                 {isUploading ? 'Ladataan...' : 'Lataa'}
               </button>
+
+              {isUploading && (
+                <div style={{ margin: '15px 0' }}>
+                  <p>Ladataan tiedostoa... {uploadProgress}%</p>
+                  <progress value={uploadProgress} max="100" style={{ width: '100%', height: '20px' }} />
+                  <div style={{ width: '100%',backgroundColor: '#ddd', borderRadius: '4px', height: '8px', marginTop: '8px'
+                  }}>
+                    <div style={{ width: `${uploadProgress}%`, height: '100%', backgroundColor: '#4CAF50', borderRadius: '4px',transition: 'width 0.3s ease'
+                    }} />
+                  </div>
+                </div>
+              )}
+
             </form>
 
             {message && (
