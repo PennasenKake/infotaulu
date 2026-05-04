@@ -177,31 +177,65 @@ function Dashboard({ onLogout, token }) {
           <div className="panel">
             <h2 className="panel-title">Hallintapaneeli</h2>
 
-            <form onSubmit={handleSubmit}>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,video/mp4, application/pdf"
-                onChange={handleFileChange}
-                disabled={isUploading}
-              />
+ <div className="upload-section" style={{ marginBottom: '25px' }}>
 
-              <button disabled={!file || isUploading}>
-                {isUploading ? 'Ladataan...' : 'Lataa'}
-              </button>
+  <h3>Lisää uusi tiedosto</h3>
 
-              {isUploading && (
-                <div style={{ margin: '15px 0' }}>
-                  <p>Ladataan tiedostoa... {uploadProgress}%</p>
-                  <progress value={uploadProgress} max="100" style={{ width: '100%', height: '20px' }} />
-                  <div style={{ width: '100%',backgroundColor: '#ddd', borderRadius: '4px', height: '8px', marginTop: '8px'
-                  }}>
-                    <div style={{ width: `${uploadProgress}%`, height: '100%', backgroundColor: '#4CAF50', borderRadius: '4px',transition: 'width 0.3s ease'
-                    }} />
-                  </div>
-                </div>
-              )}
+  <div style={{ display: 'flex', gap: '12px', alignItems: 'end', flexWrap: 'wrap' }}>
 
-            </form>
+    {/* Tiedoston valinta */}
+    <div style={{ flex: 1, minWidth: '280px' }}>
+      <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>
+        Valitse tiedosto
+      </label>
+      <input 
+        type="file" 
+        accept="image/jpeg,image/png,video/mp4,application/pdf" 
+        onChange={handleFileChange}
+        style={{ width: '100%' }}
+      />
+      {file && (
+        <p style={{ marginTop: '6px', color: '#666', fontSize: '0.95rem' }}>
+          Valittu: <strong>{file.name}</strong> ({(file.size / 1024 / 1024).toFixed(1)} MB)
+        </p>
+      )}
+    </div>
+
+    {/* Lataa-nappi */}
+    <button 
+      onClick={handleSubmit}
+      disabled={isUploading || !file}
+      style={{
+        padding: '12px 28px',
+        fontSize: '1.1rem',
+        fontWeight: '600',
+        backgroundColor: isUploading ? '#666' : '#d32f2f',
+        color: 'white',
+        border: 'none',
+        borderRadius: '6px',
+        cursor: isUploading || !file ? 'not-allowed' : 'pointer',
+        minWidth: '140px'
+      }}
+    >
+      {isUploading ? `Ladataan... ${uploadProgress}%` : 'Lataa tiedosto'}
+    </button>
+
+  </div>
+
+  {/* Progress bar */}
+  {isUploading && (
+    <div style={{ marginTop: '16px' }}>
+      <progress value={uploadProgress} max="100" style={{ width: '100%', height: '10px' }} />
+      <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '0.95rem' }}>
+        {uploadProgress}% valmiina
+      </p>
+    </div>
+  )}
+
+</div>
+
+            {/* Viesti */}
+            <h3 style={{ marginTop: '2rem' }}>Viesti</h3>
 
             {message && (
               <p style={{ color: message.includes('Onnistui') ? 'green' : 'red' }}>
