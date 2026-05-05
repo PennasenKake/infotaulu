@@ -116,6 +116,38 @@ function Dashboard({ onLogout, token }) {
     }
   };
 
+
+  const handleDownload = async (id, filename) => {
+    try {
+      const res = await fetch(`${API_URL}/api/upload/download/${id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error('Lataus epäonnistui');
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      setMessage(`✅ ${filename} ladattu`);
+    } catch (err) {
+      setError(`Latausvirhe: ${err.message}`);
+    }
+  };
+
+
+
   return (
     <div className="App">
       <div className="two-column">
@@ -202,15 +234,13 @@ function Dashboard({ onLogout, token }) {
                 {files.map((f) => (
                   <tr key={f._id}>
                     <td>
-                      <a 
-                        href={`${API_URL}/api/upload/download/${f._id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button 
                         className="file-link"
-                        download={f.originalName}
+                        onClick={() => handleDownload(f._id, f.originalName)}
+                        style={{ background: 'none', border: 'none', color: '#0d6efd', textDecoration: 'underline', cursor: 'pointer' }}
                       >
                         {f.originalName}
-                      </a>
+                      </button>
                     </td>
                     <td>{f.uploadedBy}</td>
                     <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>

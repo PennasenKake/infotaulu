@@ -31,17 +31,16 @@ router.get('/download/:id', authenticateToken, async (req, res) => {
 
     res.set({
       'Content-Type': file.mimeType || 'application/octet-stream',
-      'Content-Disposition': `attachment; filename="${file.originalName}"`
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(file.originalName)}"`,
+      'Content-Length': file.size || undefined
     });
 
     downloadStream.pipe(res);
   } catch (err) {
-    console.error(err);
+    console.error('Download error:', err);
     res.status(500).json({ error: 'Virhe tiedoston lataamisessa' });
   }
 });
-
-
 
 // Suojatut reitit
 router.get('/', authenticateToken, listFiles);
