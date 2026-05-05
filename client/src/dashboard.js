@@ -116,34 +116,78 @@ function Dashboard({ onLogout, token }) {
     }
   };
 
-const handleDownload = async (id, originalName) => {
+const uploadFile = async (req, res) => {
   try {
-    const res = await fetch(`${API_URL}/api/upload/download/${id}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || `Palvelinvirhe (${res.status})`);
+    if (!req.file) {
+      return res.status(400).json({ error: 'Tiedostoa ei ladattu' });
     }
 
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = originalName || 'tiedosto';
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    a.remove();
+    const { originalname, mimetype, buffer, size } = req.file;
+    const uploadedBy = req.body.uploadedBy || 'anonymous';
 
-    setMessage(`Ladataan: ${originalName}`);
-  } catch (err) {
-    console.error(err);
-    setError(`Lataus epäonnistui: ${err.message}`);
+    // Tarkistetaan ettei sama nimi ole jo olemassa
+    const existing = await UploadedFile.findOne({ originalName: originalname });
+    if (existing) {
+      return res.status(409).json({ 
+        error: `Tiedosto "${originalname}" on jo olemassa. Poista vanha ensin.` 
+      });
+    }
+
+    const bucket = getGridFSBucket();
+
+    const uploadStream = bucket.openUploadStream(originalname, {
+      contentType: mimetype,
+    });
+
+    const readableStream = Readable.from(buffer);
+
+    readableStream.pipe(uploadStream)
+      .on('error', (err) => {
+        console.error('GridFS upload error:', err);
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Tiedoston tallennus epäonnistui' });
+        }
+      })
+      .on('finish', async () => {
+        try {
+          // ← TÄHÄN TULEE SUOSITTELEMANI KOODI
+          const newFile = new UploadedFile({
+            filename: uploadStream.id.toString(),     // TÄRKEÄÄ: String-muodossa
+            originalName: originalname,
+            mimeType: mimetype,
+            size: size || buffer.length,
+            uploadedBy,
+          });
+
+          await newFile.save();
+
+          if (!res.headersSent) {
+            res.status(201).json({
+              message: 'Tiedosto ladattu onnistuneesti',
+              file: {
+                id: newFile._id.toString(),
+                filename: newFile.filename,
+                originalName: newFile.originalName,
+                mimeType: newFile.mimeType,
+                size: newFile.size,
+                uploadedBy: newFile.uploadedBy,
+                uploadedAt: newFile.uploadedAt,
+              }
+            });
+          }
+        } catch (dbError) {
+          console.error('Metatietojen tallennusvirhe:', dbError);
+          if (!res.headersSent) {
+            res.status(500).json({ error: 'Metatietojen tallennus epäonnistui' });
+          }
+        }
+      });
+
+  } catch (error) {
+    console.error('uploadFile error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Palvelinvirhe tiedoston käsittelyssä' });
+    }
   }
 };
 
