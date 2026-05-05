@@ -128,12 +128,20 @@ function Dashboard({ onLogout, token }) {
         <div className="guide">
           <div className="panel">
             <h2 className="panel-title">Ohjeet</h2>
-            <ul>
-              <li><strong>Valitse tiedosto</strong> → paina alla olevaa kenttää</li>
-              <li><strong>Sallitut tiedostot:</strong> JPG, PNG, MP4, PDF (max. 50 Mt)</li>
-              <li>Paina <strong>Lataa</strong> → tiedosto siirtyy pilveen</li>
-              <li>Tiedostot näkyvät automaattisesti infotaululla</li>
-            </ul>
+              <ul>
+                <li><strong>Lataa tiedostoja</strong> painamalla "Valitse tiedosto" -kenttää ja valitsemalla kuva tai video tietokoneeltasi.</li>
+                <li><strong>Sallitut tiedostotyypit</strong>: vain JPG, PNG ja MP4 (max. koko ~50 Mt).</li>
+                <li>Paina <strong>“Lataa”</strong>-nappia – tiedosto siirtyy palvelimelle.</li>
+                <li>Onnistuessaan näet viestin “Onnistui! Tiedosto: [tiedostonimi]” ja tiedosto ilmestyy listaan heti.</li>
+                <li>Tiedostot <strong>näkyvät infotaululla automaattisesti</strong> (Raspberry Pi -laitteella).</li>
+                <li>Poistaaksesi tiedoston:
+                    <ul style={{ marginTop: '0.5rem' }}>
+                        <li>Klikkaa tiedoston rivillä olevaa <strong>“Poista”</strong>-nappia</li>
+                        <li>Vahvista poistaminen ponnahdusikkunassa</li>
+                        <li>Tiedosto katoaa listasta ja infotaululta</li>
+                    </ul>
+                </li>
+              </ul>
           </div>
         </div>
 
