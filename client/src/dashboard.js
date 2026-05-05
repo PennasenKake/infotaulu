@@ -232,7 +232,7 @@ function Dashboard({ onLogout, token }) {
                 <tr key={f._id}>
 <td>
   <button 
-    className="file-link-btn"
+    className="file-link"
     onClick={() => handleDownload(f._id, f.originalName)}
   >
     {f.originalName}
