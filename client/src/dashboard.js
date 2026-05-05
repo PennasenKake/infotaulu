@@ -201,7 +201,17 @@ function Dashboard({ onLogout, token }) {
               <tbody>
                 {files.map((f) => (
                   <tr key={f._id}>
-                    <td>{f.originalName}</td>
+                    <td>
+                      <a 
+                        href={`${API_URL}/api/upload/download/${f._id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="file-link"
+                        download={f.originalName}
+                      >
+                        {f.originalName}
+                      </a>
+                    </td>
                     <td>{f.uploadedBy}</td>
                     <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>
                     <td>

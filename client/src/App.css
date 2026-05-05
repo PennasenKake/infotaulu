@@ -320,3 +320,15 @@ p {
 .logout-btn:hover {
   background-color: #334155;
 }
+
+
+.file-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.file-link:hover {
+  text-decoration: underline;
+  color: #2563eb;
+}

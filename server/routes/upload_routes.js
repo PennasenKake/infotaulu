@@ -21,6 +21,28 @@ const upload = multer({
   }
 });
 
+router.get('/download/:id', authenticateToken, async (req, res) => {
+  try {
+    const file = await UploadedFile.findById(req.params.id);
+    if (!file) return res.status(404).json({ error: 'Tiedostoa ei löytynyt' });
+
+    const bucket = getGridFSBucket();
+    const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(file.filename));
+
+    res.set({
+      'Content-Type': file.mimeType || 'application/octet-stream',
+      'Content-Disposition': `attachment; filename="${file.originalName}"`
+    });
+
+    downloadStream.pipe(res);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Virhe tiedoston lataamisessa' });
+  }
+});
+
+
+
 // Suojatut reitit
 router.get('/', authenticateToken, listFiles);
 router.post('/', authenticateToken, upload.single('file'), uploadFile);

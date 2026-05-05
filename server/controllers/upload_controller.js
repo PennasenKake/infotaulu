@@ -7,12 +7,21 @@ const mongoose = require('mongoose');
 
 const uploadFile = async (req, res) => {
   try {
+
     // Multer on jo tarkistanut tiedoston olemassaolon → tämä on viimeinen tarkistus
     if (!req.file) {
       return res.status(400).json({ error: 'Tiedostoa ei ladattu' });
     }
 
+    const { originalname, mimetype, buffer } = req.file;
     const uploadedBy = req.body.uploadedBy || 'anonymous';
+
+    const existing = await UploadedFile.findOne({ originalName: originalname });
+    if (existing) {
+      return res.status(409).json({ 
+        error: `Tiedosto "${originalname}" on jo olemassa. Poista vanha ensin tai lataa eri nimellä.` 
+      });
+    }
 
     const bucket = getGridFSBucket();
 
