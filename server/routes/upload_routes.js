@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const mongoose = require('mongoose');
 
 const { uploadFile, listFiles, deleteFile } = require('../controllers/upload_controller');
 const { authenticateToken } = require('../middleware/auth');
-
-const UploadedFile = require('../models/uploadedFile');           
-const { getGridFSBucket } = require('../config/db'); 
+const UploadedFile = require('../models/uploadedFile');
+const { getGridFSBucket } = require('../config/db');
 
 // Multer asetukset
 const storage = multer.memoryStorage();
@@ -14,16 +14,16 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024 }, // 50 Mt
+
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4' , 'application/pdf' ];
+    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4', 'application/pdf'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Vain JPG, PNG, PDF ja MP4-tiedostot ovat sallittuja'), false);
+      cb(new Error('Vain JPG, PNG, MP4 ja PDF-tiedostot ovat sallittuja'), false);
     }
   }
 });
-
 
 // Download-reitti
 router.get('/download/:id', authenticateToken, async (req, res) => {
@@ -41,15 +41,12 @@ router.get('/download/:id', authenticateToken, async (req, res) => {
 
     let downloadStream;
     try {
-      // Varmistetaan että filename on kelvollinen ObjectId
-      const gridfsId = new mongoose.Types.ObjectId(file.filename);
-      downloadStream = bucket.openDownloadStream(gridfsId);
+      downloadStream = bucket.openDownloadStream(
+        new mongoose.Types.ObjectId(file.filename)
+      );
     } catch (idError) {
-      console.error('Invalid GridFS filename:', file.filename, idError);
-      return res.status(400).json({ 
-        error: 'Virheellinen GridFS-tunniste tiedostossa',
-        filename: file.filename 
-      });
+      console.error('Invalid GridFS ObjectId:', file.filename);
+      return res.status(400).json({ error: 'Virheellinen tiedostotunniste' });
     }
 
     res.set({
@@ -59,9 +56,9 @@ router.get('/download/:id', authenticateToken, async (req, res) => {
     });
 
     downloadStream.on('error', (err) => {
-      console.error('GridFS download error:', err);
+      console.error('GridFS download stream error:', err);
       if (!res.headersSent) {
-        res.status(500).json({ error: 'Virhe tiedoston lukemisessa GridFS:stä' });
+        res.status(500).json({ error: 'Virhe tiedoston lukemisessa' });
       }
     });
 

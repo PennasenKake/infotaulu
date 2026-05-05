@@ -12,7 +12,6 @@ function Dashboard({ onLogout, token }) {
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
 
-  // Haetaan tiedostot komponentin ladatessa
   useEffect(() => {
     if (token) fetchFiles();
   }, [token]);
@@ -27,7 +26,6 @@ function Dashboard({ onLogout, token }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!file) {
       setMessage('Valitse ensin tiedosto');
       return;
@@ -46,7 +44,6 @@ function Dashboard({ onLogout, token }) {
     formData.append('file', file);
     formData.append('uploadedBy', email);
 
-    // XMLHttpRequest progress baria varten
     const xhr = new XMLHttpRequest();
 
     xhr.upload.onprogress = (event) => {
@@ -116,80 +113,34 @@ function Dashboard({ onLogout, token }) {
     }
   };
 
-const uploadFile = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'Tiedostoa ei ladattu' });
-    }
-
-    const { originalname, mimetype, buffer, size } = req.file;
-    const uploadedBy = req.body.uploadedBy || 'anonymous';
-
-    // Tarkistetaan ettei sama nimi ole jo olemassa
-    const existing = await UploadedFile.findOne({ originalName: originalname });
-    if (existing) {
-      return res.status(409).json({ 
-        error: `Tiedosto "${originalname}" on jo olemassa. Poista vanha ensin.` 
-      });
-    }
-
-    const bucket = getGridFSBucket();
-
-    const uploadStream = bucket.openUploadStream(originalname, {
-      contentType: mimetype,
-    });
-
-    const readableStream = Readable.from(buffer);
-
-    readableStream.pipe(uploadStream)
-      .on('error', (err) => {
-        console.error('GridFS upload error:', err);
-        if (!res.headersSent) {
-          res.status(500).json({ error: 'Tiedoston tallennus epäonnistui' });
-        }
-      })
-      .on('finish', async () => {
-        try {
-          // ← TÄHÄN TULEE SUOSITTELEMANI KOODI
-          const newFile = new UploadedFile({
-            filename: uploadStream.id.toString(),     // TÄRKEÄÄ: String-muodossa
-            originalName: originalname,
-            mimeType: mimetype,
-            size: size || buffer.length,
-            uploadedBy,
-          });
-
-          await newFile.save();
-
-          if (!res.headersSent) {
-            res.status(201).json({
-              message: 'Tiedosto ladattu onnistuneesti',
-              file: {
-                id: newFile._id.toString(),
-                filename: newFile.filename,
-                originalName: newFile.originalName,
-                mimeType: newFile.mimeType,
-                size: newFile.size,
-                uploadedBy: newFile.uploadedBy,
-                uploadedAt: newFile.uploadedAt,
-              }
-            });
-          }
-        } catch (dbError) {
-          console.error('Metatietojen tallennusvirhe:', dbError);
-          if (!res.headersSent) {
-            res.status(500).json({ error: 'Metatietojen tallennus epäonnistui' });
-          }
-        }
+  const handleDownload = async (id, originalName) => {
+    try {
+      const res = await fetch(`${API_URL}/api/upload/download/${id}`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
       });
 
-  } catch (error) {
-    console.error('uploadFile error:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ error: 'Palvelinvirhe tiedoston käsittelyssä' });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Palvelinvirhe (${res.status})`);
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = originalName || 'tiedosto';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      setMessage(`Ladataan: ${originalName}`);
+    } catch (err) {
+      console.error(err);
+      setError(`Lataus epäonnistui: ${err.message}`);
     }
-  }
-};
+  };
 
   return (
     <div className="App">
@@ -222,7 +173,6 @@ const uploadFile = async (req, res) => {
             <h2 className="panel-title">Hallintapaneeli</h2>
 
             <form onSubmit={handleSubmit} className="upload-form">
-
               <div className="file-input-wrapper">
                 <input
                   type="file"
@@ -245,59 +195,53 @@ const uploadFile = async (req, res) => {
               </button>
             </form>
 
-            {/* Progress Bar */}
             {isUploading && (
               <div className="progress-container">
                 <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
-                    style={{ width: `${uploadProgress}%` }}
-                  />
+                  <div className="progress-fill" style={{ width: `${uploadProgress}%` }} />
                 </div>
-                <div className="progress-text">
-                  Ladataan... {uploadProgress}%
-                </div>
+                <div className="progress-text">Ladataan... {uploadProgress}%</div>
               </div>
             )}
 
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
 
-          {/* Tiedostolista */}
-          <table className="file-table">
-            <thead>
-              <tr>
-                <th>Nimi</th>
-                <th>Lataaja</th>
-                <th>Päivä</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {files.map((f) => (
-                <tr key={f._id}>
-<td>
-  <button 
-    className="file-link"
-    onClick={() => handleDownload(f._id, f.originalName)}
-  >
-    {f.originalName}
-  </button>
-</td>
-                  <td>{f.uploadedBy}</td>
-                  <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>
-                  <td>
-                    <button 
-                      className="delete-btn"
-                      onClick={() => handleDelete(f._id)}
-                    >
-                      Poista
-                    </button>
-                  </td>
+            {/* Tiedostolista */}
+            <table className="file-table">
+              <thead>
+                <tr>
+                  <th>Nimi</th>
+                  <th>Lataaja</th>
+                  <th>Päivä</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {files.map((f) => (
+                  <tr key={f._id}>
+                    <td>
+                      <button 
+                        className="file-link"
+                        onClick={() => handleDownload(f._id, f.originalName)}
+                      >
+                        {f.originalName}
+                      </button>
+                    </td>
+                    <td>{f.uploadedBy}</td>
+                    <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>
+                    <td>
+                      <button 
+                        className="delete-btn"
+                        onClick={() => handleDelete(f._id)}
+                      >
+                        Poista
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
             <p style={{ marginTop: '1.5rem' }}>
               Kirjautuneena: <strong>{email}</strong>
