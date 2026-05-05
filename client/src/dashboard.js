@@ -12,12 +12,14 @@ function Dashboard({ onLogout, token }) {
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
 
+  // Haetaan tiedostot komponentin ladatessa
   useEffect(() => {
-    fetchFiles();
+    if (token) fetchFiles();
   }, [token]);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
     setMessage('');
     setError(null);
     setUploadProgress(0);
@@ -25,6 +27,7 @@ function Dashboard({ onLogout, token }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (!file) {
       setMessage('Valitse ensin tiedosto');
       return;
@@ -43,6 +46,7 @@ function Dashboard({ onLogout, token }) {
     formData.append('file', file);
     formData.append('uploadedBy', email);
 
+    // XMLHttpRequest progress baria varten
     const xhr = new XMLHttpRequest();
 
     xhr.upload.onprogress = (event) => {
@@ -75,8 +79,6 @@ function Dashboard({ onLogout, token }) {
   };
 
   const fetchFiles = async () => {
-    if (!token) return;
-
     try {
       const res = await fetch(`${API_URL}/api/upload`, {
         method: 'GET',
@@ -91,7 +93,7 @@ function Dashboard({ onLogout, token }) {
       const data = await res.json();
       setFiles(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error(err);
+      console.error('Virhe tiedostojen haussa:', err);
       setError('Tiedostojen haku epäonnistui');
     }
   };
@@ -144,15 +146,26 @@ function Dashboard({ onLogout, token }) {
           <div className="panel">
             <h2 className="panel-title">Hallintapaneeli</h2>
 
-            <form onSubmit={handleSubmit}>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,video/mp4,application/pdf"
-                onChange={handleFileChange}
-                disabled={isUploading}
-              />
+            <form onSubmit={handleSubmit} className="upload-form">
 
-              <button type="submit" disabled={!file || isUploading}>
+              <div className="file-input-wrapper">
+                <input
+                  type="file"
+                  id="file-upload"
+                  accept="image/jpeg,image/png,video/mp4,application/pdf"
+                  onChange={handleFileChange}
+                  disabled={isUploading}
+                />
+                <label htmlFor="file-upload" className="file-label">
+                  {file ? file.name : "Valitse tiedosto tietokoneelta"}
+                </label>
+              </div>
+
+              <button 
+                type="submit" 
+                className="upload-button"
+                disabled={!file || isUploading}
+              >
                 {isUploading ? 'Ladataan...' : 'Lataa tiedosto'}
               </button>
             </form>
@@ -161,7 +174,10 @@ function Dashboard({ onLogout, token }) {
             {isUploading && (
               <div className="progress-container">
                 <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${uploadProgress}%` }} />
+                  <div 
+                    className="progress-fill" 
+                    style={{ width: `${uploadProgress}%` }}
+                  />
                 </div>
                 <div className="progress-text">
                   Ladataan... {uploadProgress}%
@@ -189,7 +205,10 @@ function Dashboard({ onLogout, token }) {
                     <td>{f.uploadedBy}</td>
                     <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>
                     <td>
-                      <button className="delete-btn" onClick={() => handleDelete(f._id)}>
+                      <button 
+                        className="delete-btn"
+                        onClick={() => handleDelete(f._id)}
+                      >
                         Poista
                       </button>
                     </td>
