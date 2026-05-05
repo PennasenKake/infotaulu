@@ -24,63 +24,61 @@ function Dashboard({ onLogout, token }) {
     setError(null);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  
+  const handleSubmit = (e) => {
+  e.preventDefault();
 
-    if (!file) {
-      setMessage('Valitse ensin tiedosto');
-      return;
+  if (!file) { setMessage('Valitse ensin tiedosto'); return; }
+  if (!token) { setMessage('Kirjaudu ensin sisään'); return; }
+
+  setIsUploading(true);
+  setMessage('');
+  setUploadProgress(0);
+  setError(null);
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('uploadedBy', email);
+
+  const xhr = new XMLHttpRequest();
+
+  // Progress seuranta — tämä toimii toisin kuin fetch
+  xhr.upload.addEventListener('progress', (event) => {
+    if (event.lengthComputable) {
+      const progress = Math.round((event.loaded / event.total) * 100);
+      setUploadProgress(progress);
     }
+  });
 
-    if (!token) {
-      setMessage('Kirjaudu ensin sisään');
-      return;
-    }
-
-    setIsUploading(true);
-    setMessage('');
-    setUploadProgress(0);  
-    setError(null);
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('uploadedBy', email);
-
+  xhr.addEventListener('load', () => {
     try {
-      const res = await fetch(`${API_URL}/api/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData,
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setUploadProgress(percentCompleted);
-        }
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (res.status === 401 || res.status === 403) {
-          onLogout();
-          return;
-        }
+      const data = JSON.parse(xhr.responseText);
+      if (xhr.status === 401 || xhr.status === 403) {
+        onLogout(); return;
+      }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        setMessage(`Onnistui! Tiedosto: ${data.file?.originalName || 'tiedosto'}`);
+        setFile(null);
+        fetchFiles();
+      } else {
         throw new Error(data.error || 'Lataus epäonnistui');
       }
-
-      
-      setMessage(`Onnistui! Tiedosto: ${data.file?.originalName || 'tiedosto'}`);
-      setFile(null);
-      fetchFiles();
-
     } catch (err) {
-      console.error(err);
       setMessage(`Virhe: ${err.message}`);
     } finally {
       setIsUploading(false);
     }
-  };
+  });
+
+  xhr.addEventListener('error', () => {
+    setMessage('Verkkovirhe latauksen aikana');
+    setIsUploading(false);
+  });
+
+  xhr.open('POST', `${API_URL}/api/upload`);
+  xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+  xhr.send(formData);
+};
 
   const fetchFiles = async () => {
     if (!token) return;
@@ -177,75 +175,119 @@ function Dashboard({ onLogout, token }) {
           <div className="panel">
             <h2 className="panel-title">Hallintapaneeli</h2>
 
-{/* Latausosio */}
-<div className="upload-section" style={{ marginBottom: '2rem' }}>
-  <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-    
-    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-      <input
-        type="file"
-        accept="image/jpeg,image/png,video/mp4,application/pdf"
-        onChange={handleFileChange}
-        disabled={isUploading}
-        style={{ flex: '1', minWidth: '200px' }}
-      />
-      
-      <button 
-        type="submit" 
-        disabled={!file || isUploading}
-        style={{
-          padding: '12px 28px',
-          backgroundColor: isUploading ? '#666' : '#e63939',
-          color: 'white',
-          border: 'none',
-          borderRadius: '6px',
-          fontWeight: '600',
-          cursor: (!file || isUploading) ? 'not-allowed' : 'pointer',
-          minWidth: '140px'
-        }}
-      >
-        {isUploading ? 'Ladataan...' : 'Lataa tiedosto'}
-      </button>
-    </div>
+              <form onSubmit={handleSubmit}>
 
-    {/* Progress Bar - parannettu versio */}
-    {isUploading && (
-      <div style={{ marginTop: '8px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.95rem' }}>
-          <span>Ladataan tiedostoa...</span>
-          <span><strong>{uploadProgress}%</strong></span>
-        </div>
-        
-        <div style={{
-          width: '100%',
-          height: '10px',
-          backgroundColor: '#e0e0e0',
-          borderRadius: '9999px',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            width: `${uploadProgress}%`,
-            height: '100%',
-            background: 'linear-gradient(90deg, #e63939, #ff4d4d)',
-            borderRadius: '9999px',
-            transition: 'width 0.25s ease-in-out',
-            boxShadow: '0 0 8px rgba(230, 57, 57, 0.5)'
-          }} />
-        </div>
-      </div>
-    )}
-  </form>
-</div>
+                {/* Tiedostovalitsin ja nappi samalla rivillä */}
+                <div style={{
+                  display: 'flex',
+                  gap: '10px',
+                  alignItems: 'center',
+                  marginBottom: '12px'
+                }}>
+                  <label style={{
+                    display: 'inline-block',
+                    padding: '8px 16px',
+                    backgroundColor: '#f5f5f5',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    Valitse tiedosto
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,video/mp4,application/pdf"
+                      onChange={handleFileChange}
+                      disabled={isUploading}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
 
-{message && (
-  <p style={{ 
-    color: message.includes('Onnistui') ? '#2e7d32' : '#d32f2f',
-    fontWeight: '500',
-    margin: '12px 0'
-  }}>
-    {message}
-  </p>
-)}
+                  {/* Tiedostonimi näkyy valitsimen vieressä */}
+                  <span style={{
+                    fontSize: '0.85rem',
+                    color: '#555',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '200px'
+                  }}>
+                    {file ? file.name : 'Ei tiedostoa valittu'}
+                  </span>
+                </div>
+
+                <button
+                  disabled={!file || isUploading}
+                  style={{ width: '100%', marginBottom: '12px' }}
+                >
+                  {isUploading ? `Ladataan... ${uploadProgress}%` : 'Lataa'}
+                </button>
+
+                {/* Progress bar animaatiolla */}
+                {isUploading && (
+                  <div style={{ margin: '8px 0 16px 0' }}>
+
+                    {/* Prosenttiluku ja tiedostokoko */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: '0.8rem',
+                      color: '#555',
+                      marginBottom: '6px'
+                    }}>
+                      <span>Ladataan palvelimelle...</span>
+                      <span style={{ fontWeight: 'bold' }}>{uploadProgress}%</span>
+                    </div>
+
+                    {/* Progress bar tausta */}
+                    <div style={{
+                      width: '100%',
+                      backgroundColor: '#e9ecef',
+                      borderRadius: '8px',
+                      height: '14px',
+                      overflow: 'hidden',
+                      boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                    }}>
+                      {/* Animoitu täyttö */}
+                      <div style={{
+                        width: `${uploadProgress}%`,
+                        height: '100%',
+                        background: uploadProgress === 100
+                          ? '#28a745'                          // vihreä kun valmis
+                          : 'linear-gradient(90deg, #c0392b, #e74c3c)', // SPR punainen
+                        borderRadius: '8px',
+                        transition: 'width 0.4s ease',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}>
+                        {/* Kiiltävä liike-efekti */}
+                        <div style={{
+                          position: 'absolute',
+                          top: 0, left: '-100%',
+                          width: '100%', height: '100%',
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                          animation: 'shimmer 1.5s infinite'
+                        }}/>
+                      </div>
+                    </div>
+
+                    {/* Vaiheviesti */}
+                    <p style={{
+                      fontSize: '0.75rem',
+                      color: '#888',
+                      marginTop: '4px',
+                      textAlign: 'center'
+                    }}>
+                      {uploadProgress < 30 && '⏳ Aloitetaan lataus...'}
+                      {uploadProgress >= 30 && uploadProgress < 70 && '📤 Siirretään tiedostoa...'}
+                      {uploadProgress >= 70 && uploadProgress < 100 && '🔄 Viimeistellään...'}
+                      {uploadProgress === 100 && '✅ Valmis!'}
+                    </p>
+                  </div>
+                )}
+
+              </form>
 
             {message && (
               <p style={{ color: message.includes('Onnistui') ? 'green' : 'red' }}>
