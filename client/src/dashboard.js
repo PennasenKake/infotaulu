@@ -116,34 +116,34 @@ function Dashboard({ onLogout, token }) {
     }
   };
 
-    const handleDownload = async (id, originalName) => {
-    try {
-      const res = await fetch(`${API_URL}/api/upload/download/${id}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+const handleDownload = async (id, originalName) => {
+  try {
+    const res = await fetch(`${API_URL}/api/upload/download/${id}`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
 
-      if (!res.ok) {
-        throw new Error('Lataus epäonnistui');
-      }
-
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = originalName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
-    } catch (err) {
-      setError('Tiedoston lataaminen epäonnistui');
-      console.error(err);
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Lataus epäonnistui');
     }
-  };
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = originalName || 'tiedosto';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+    setMessage(`Ladataan: ${originalName}`);
+  } catch (err) {
+    console.error(err);
+    setError(`Lataus epäonnistui: ${err.message}`);
+  }
+};
 
   return (
     <div className="App">

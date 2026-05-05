@@ -1,25 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const mongoose = require('mongoose');
 
 const { uploadFile, listFiles, deleteFile } = require('../controllers/upload_controller');
 const { authenticateToken } = require('../middleware/auth');
-const UploadedFile = require('../models/uploadedFile');        
-const { getGridFSBucket } = require('../config/db');           
+
+const UploadedFile = require('../models/uploadedFile');           
+const { getGridFSBucket } = require('../config/db'); 
 
 // Multer asetukset
 const storage = multer.memoryStorage();
 
-const upload = multer({ fileSize: 50 * 1024 * 1024 }, // 50 Mt
+const upload = multer({
   storage,
-  limits: { fileSize: 100 * 1024 * 1024 }, 
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 Mt
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4', 'application/pdf'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4' , 'application/pdf' ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Vain JPG, PNG, MP4 ja PDF-tiedostot ovat sallittuja'), false);
+      cb(new Error('Vain JPG, PNG, PDF ja MP4-tiedostot ovat sallittuja'), false);
     }
   }
 });
@@ -50,7 +50,7 @@ router.get('/download/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Muut reitit
+// Suojatut reitit
 router.get('/', authenticateToken, listFiles);
 router.post('/', authenticateToken, upload.single('file'), uploadFile);
 router.delete('/:id', authenticateToken, deleteFile);
