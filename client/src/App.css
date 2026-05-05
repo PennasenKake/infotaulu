@@ -322,13 +322,32 @@ p {
 }
 
 
-.file-link {
-  color: #3b82f6;
-  text-decoration: none;
+/* ========== TIEDOSTON NIMI - LATAUSLINKKI ========== */
+
+.file-download-link {
+  background: none;
+  border: none;
+  color: #2563eb;
   font-weight: 500;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.file-link:hover {
+.file-download-link:hover {
+  background-color: #eff6ff;
+  color: #1e40af;
   text-decoration: underline;
-  color: #2563eb;
+}
+
+.file-download-link:active {
+  background-color: #dbeafe;
+  transform: translateY(1px);
 }
