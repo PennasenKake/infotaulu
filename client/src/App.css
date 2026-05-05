@@ -166,3 +166,153 @@ p {
   }
 }
 
+/* ==================== UPLOAD AREA ==================== */
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.file-input-wrapper {
+  position: relative;
+}
+
+.file-input-wrapper input[type="file"] {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.file-label {
+  display: block;
+  padding: 14px 16px;
+  background-color: #f1f5f9;
+  border: 2px dashed #64748b;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+  color: #475569;
+}
+
+.file-label:hover {
+  background-color: #e2e8f0;
+  border-color: #3b82f6;
+}
+
+.upload-button {
+  padding: 12px 24px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.upload-button:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.upload-button:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* ==================== PROGRESS BAR ==================== */
+.progress-container {
+  margin: 12px 0;
+}
+
+.progress-bar {
+  height: 10px;
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  transition: width 0.3s ease;
+  border-radius: 9999px;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ==================== MESSAGES ==================== */
+.success {
+  color: #16a34a;
+  background-color: #f0fdf4;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border-left: 4px solid #16a34a;
+}
+
+.error {
+  color: #ef4444;
+  background-color: #fef2f2;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border-left: 4px solid #ef4444;
+}
+
+/* ==================== TABLE ==================== */
+.file-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+}
+
+.file-table th,
+.file-table td {
+  padding: 12px 8px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.file-table th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+}
+
+.delete-btn {
+  padding: 6px 12px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.delete-btn:hover {
+  background-color: #dc2626;
+}
+
+/* Logout */
+.logout-btn {
+  padding: 10px 20px;
+  background-color: #475569;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #334155;
+}
