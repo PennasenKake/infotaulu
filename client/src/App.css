@@ -322,13 +322,18 @@ p {
 }
 
 
-.file-link {
-  color: #3b82f6;
-  text-decoration: none;
-  font-weight: 500;
+.file-link-btn {
+  background: none;
+  border: none;
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  text-align: left;
 }
 
-.file-link:hover {
+.file-link-btn:hover {
+  color: #004499;
   text-decoration: underline;
-  color: #2563eb;
 }

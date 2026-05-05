@@ -116,8 +116,7 @@ function Dashboard({ onLogout, token }) {
     }
   };
 
-
-  const handleDownload = async (id, filename) => {
+    const handleDownload = async (id, originalName) => {
     try {
       const res = await fetch(`${API_URL}/api/upload/download/${id}`, {
         method: 'GET',
@@ -134,19 +133,17 @@ function Dashboard({ onLogout, token }) {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = filename;
+      a.download = originalName;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      setMessage(`✅ ${filename} ladattu`);
     } catch (err) {
-      setError(`Latausvirhe: ${err.message}`);
+      setError('Tiedoston lataaminen epäonnistui');
+      console.error(err);
     }
   };
-
-
 
   return (
     <div className="App">
@@ -220,42 +217,41 @@ function Dashboard({ onLogout, token }) {
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
 
-            {/* Tiedostolista */}
-            <table className="file-table">
-              <thead>
-                <tr>
-                  <th>Nimi</th>
-                  <th>Lataaja</th>
-                  <th>Päivä</th>
-                  <th></th>
+          {/* Tiedostolista */}
+          <table className="file-table">
+            <thead>
+              <tr>
+                <th>Nimi</th>
+                <th>Lataaja</th>
+                <th>Päivä</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {files.map((f) => (
+                <tr key={f._id}>
+<td>
+  <button 
+    className="file-link-btn"
+    onClick={() => handleDownload(f._id, f.originalName)}
+  >
+    {f.originalName}
+  </button>
+</td>
+                  <td>{f.uploadedBy}</td>
+                  <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>
+                  <td>
+                    <button 
+                      className="delete-btn"
+                      onClick={() => handleDelete(f._id)}
+                    >
+                      Poista
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {files.map((f) => (
-                  <tr key={f._id}>
-                    <td>
-                      <button 
-                        className="file-link"
-                        onClick={() => handleDownload(f._id, f.originalName)}
-                        style={{ background: 'none', border: 'none', color: '#0d6efd', textDecoration: 'underline', cursor: 'pointer' }}
-                      >
-                        {f.originalName}
-                      </button>
-                    </td>
-                    <td>{f.uploadedBy}</td>
-                    <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>
-                    <td>
-                      <button 
-                        className="delete-btn"
-                        onClick={() => handleDelete(f._id)}
-                      >
-                        Poista
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              ))}
+            </tbody>
+          </table>
 
             <p style={{ marginTop: '1.5rem' }}>
               Kirjautuneena: <strong>{email}</strong>

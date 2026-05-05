@@ -21,6 +21,13 @@ const upload = multer({
   }
 });
 
+
+
+// Suojatut reitit
+router.get('/', authenticateToken, listFiles);
+router.post('/', authenticateToken, upload.single('file'), uploadFile);
+router.delete('/:id', authenticateToken, deleteFile);
+
 router.get('/download/:id', authenticateToken, async (req, res) => {
   try {
     const file = await UploadedFile.findById(req.params.id);
@@ -32,7 +39,7 @@ router.get('/download/:id', authenticateToken, async (req, res) => {
     res.set({
       'Content-Type': file.mimeType || 'application/octet-stream',
       'Content-Disposition': `attachment; filename="${encodeURIComponent(file.originalName)}"`,
-      'Content-Length': file.size || undefined
+      'Cache-Control': 'no-cache'
     });
 
     downloadStream.pipe(res);
@@ -41,10 +48,5 @@ router.get('/download/:id', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Virhe tiedoston lataamisessa' });
   }
 });
-
-// Suojatut reitit
-router.get('/', authenticateToken, listFiles);
-router.post('/', authenticateToken, upload.single('file'), uploadFile);
-router.delete('/:id', authenticateToken, deleteFile);
 
 module.exports = router;
