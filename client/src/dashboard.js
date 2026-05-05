@@ -153,7 +153,6 @@ function Dashboard({ onLogout, token }) {
     <div className="App">
       <div className="two-column sidebar">
 
-        {/* Ohjeet */}
         <div className="guide">
           <div className="panel">
             <h2 className="panel-title">Ohjeet</h2>
@@ -174,60 +173,90 @@ function Dashboard({ onLogout, token }) {
           </div>
         </div>
 
-        {/* Hallintapaneeli */}
         <div className="dashboard">
           <div className="panel">
             <h2 className="panel-title">Hallintapaneeli</h2>
 
-            <form onSubmit={handleSubmit} className="upload-form">
+{/* Latausosio */}
+<div className="upload-section" style={{ marginBottom: '2rem' }}>
+  <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    
+    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+      <input
+        type="file"
+        accept="image/jpeg,image/png,video/mp4,application/pdf"
+        onChange={handleFileChange}
+        disabled={isUploading}
+        style={{ flex: '1', minWidth: '200px' }}
+      />
+      
+      <button 
+        type="submit" 
+        disabled={!file || isUploading}
+        style={{
+          padding: '12px 28px',
+          backgroundColor: isUploading ? '#666' : '#e63939',
+          color: 'white',
+          border: 'none',
+          borderRadius: '6px',
+          fontWeight: '600',
+          cursor: (!file || isUploading) ? 'not-allowed' : 'pointer',
+          minWidth: '140px'
+        }}
+      >
+        {isUploading ? 'Ladataan...' : 'Lataa tiedosto'}
+      </button>
+    </div>
 
-              {/* Parempi tiedoston valinta */}
-              <div className="file-input-wrapper">
-                <label className="file-label">
-                  {file ? file.name : "Valitse tiedosto tietokoneelta"}
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,video/mp4,application/pdf"
-                    onChange={handleFileChange}
-                    disabled={isUploading}
-                  />
-                </label>
-              </div>
+    {/* Progress Bar - parannettu versio */}
+    {isUploading && (
+      <div style={{ marginTop: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.95rem' }}>
+          <span>Ladataan tiedostoa...</span>
+          <span><strong>{uploadProgress}%</strong></span>
+        </div>
+        
+        <div style={{
+          width: '100%',
+          height: '10px',
+          backgroundColor: '#e0e0e0',
+          borderRadius: '9999px',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            width: `${uploadProgress}%`,
+            height: '100%',
+            background: 'linear-gradient(90deg, #e63939, #ff4d4d)',
+            borderRadius: '9999px',
+            transition: 'width 0.25s ease-in-out',
+            boxShadow: '0 0 8px rgba(230, 57, 57, 0.5)'
+          }} />
+        </div>
+      </div>
+    )}
+  </form>
+</div>
 
-              {/* Lataa-nappi */}
-              <button 
-                type="submit" 
-                className="upload-button"
-                disabled={!file || isUploading}
-              >
-                {isUploading ? 'Ladataan...' : 'Lataa tiedosto'}
-              </button>
-
-              {/* Parannettu Progress Bar */}
-              {isUploading && (
-                <div className="progress-container">
-                  <div className="progress-info">
-                    <span>Ladataan tiedostoa...</span>
-                    <span>{uploadProgress}%</span>
-                  </div>
-                  <div className="progress-bar-background">
-                    <div 
-                      className="progress-bar-fill"
-                      style={{ width: `${uploadProgress}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-            </form>
+{message && (
+  <p style={{ 
+    color: message.includes('Onnistui') ? '#2e7d32' : '#d32f2f',
+    fontWeight: '500',
+    margin: '12px 0'
+  }}>
+    {message}
+  </p>
+)}
 
             {message && (
-              <p className={`message ${message.includes('Onnistui') ? 'success' : 'error'}`}>
+              <p style={{ color: message.includes('Onnistui') ? 'green' : 'red' }}>
                 {message}
               </p>
             )}
 
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
             {/* Tiedostolista */}
-            <table className="file-table">
+            <table style={{ marginTop: '2rem', width: '100%' }}>
               <thead>
                 <tr>
                   <th>Nimi</th>
@@ -241,9 +270,12 @@ function Dashboard({ onLogout, token }) {
                   <tr key={f._id}>
                     <td>{f.originalName}</td>
                     <td>{f.uploadedBy}</td>
-                    <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>
+                    <td>{new Date(f.uploadedAt).toLocaleString()}</td>
                     <td>
-                      <button className="delete-btn" onClick={() => handleDelete(f._id)}>
+                      <button
+                        style={{ backgroundColor: '#ef4444', color: 'white' }}
+                        onClick={() => handleDelete(f._id)}
+                      >
                         Poista
                       </button>
                     </td>
@@ -252,11 +284,14 @@ function Dashboard({ onLogout, token }) {
               </tbody>
             </table>
 
-            <div className="user-info">
+            <p style={{ marginTop: '2rem' }}>
               Kirjautunut: <strong>{email}</strong>
-            </div>
+            </p>
 
-            <button className="logout-btn" onClick={onLogout}>
+            <button
+              onClick={onLogout}
+              style={{ marginTop: '1rem', backgroundColor: '#444', color: 'white' }}
+            >
               Kirjaudu ulos
             </button>
           </div>
