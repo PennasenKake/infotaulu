@@ -120,12 +120,14 @@ const handleDownload = async (id, originalName) => {
   try {
     const res = await fetch(`${API_URL}/api/upload/download/${id}`, {
       method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Lataus epäonnistui');
+      throw new Error(errorData.error || `Palvelinvirhe (${res.status})`);
     }
 
     const blob = await res.blob();
@@ -135,8 +137,8 @@ const handleDownload = async (id, originalName) => {
     a.download = originalName || 'tiedosto';
     document.body.appendChild(a);
     a.click();
-    a.remove();
     window.URL.revokeObjectURL(url);
+    a.remove();
 
     setMessage(`Ladataan: ${originalName}`);
   } catch (err) {
