@@ -10,19 +10,40 @@ function Dashboard({ onLogout, token }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewType, setPreviewType] = useState(null); // 'image', 'video', 'pdf'
+
   const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
 
   useEffect(() => {
     if (token) fetchFiles();
   }, [token]);
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-    setMessage('');
-    setError(null);
-    setUploadProgress(0);
+const handleFileChange = (e) => {
+  const selectedFile = e.target.files[0];
+  if (!selectedFile) return;
+
+  setFile(selectedFile);
+  setMessage('');
+  setError(null);
+  setUploadProgress(0);
+
+  // Määritä tiedostotyyppi esikatselua varten
+  if (selectedFile.type.startsWith('image/')) {
+    setPreviewType('image');
+  } else if (selectedFile.type === 'video/mp4') {
+    setPreviewType('video');
+  } else if (selectedFile.type === 'application/pdf') {
+    setPreviewType('pdf');
+  }
+
+  // Lue tiedosto paikallisesti — ei palvelinpyyntöä
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    setPreviewUrl(event.target.result);
   };
+  reader.readAsDataURL(selectedFile);
+};
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,12 +77,16 @@ function Dashboard({ onLogout, token }) {
     xhr.onload = () => {
       setIsUploading(false);
       if (xhr.status === 200 || xhr.status === 201) {
+        setUploadProgress(100); // näytä 100% hetki
+        setTimeout(() => setUploadProgress(0), 1000); // nollaa sekunnin kuluttua
         setMessage('✅ Tiedosto ladattu onnistuneesti!');
         setFile(null);
-        setUploadProgress(0);
+        setPreviewUrl(null);   // tyhjennä esikatselu
+        setPreviewType(null);        
         fetchFiles();
       } else {
         setError('Lataus epäonnistui');
+        setUploadProgress(0);
       }
     };
 
@@ -194,6 +219,132 @@ function Dashboard({ onLogout, token }) {
                 {isUploading ? 'Ladataan...' : 'Lataa tiedosto'}
               </button>
             </form>
+
+          {/* Esikatselu */}
+          {previewUrl && (
+            <div style={{ marginTop: '16px' }}>
+              
+              {/* Otsikkorivi */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '8px'
+              }}>
+                <p style={{ 
+                  fontWeight: 'bold', 
+                  fontSize: '0.9rem',
+                  color: '#333',
+                  margin: 0
+                }}>
+                  Esikatselu — infotaulun näkymä
+                </p>
+                <button
+                  onClick={() => { setPreviewUrl(null); setPreviewType(null); setFile(null); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1.2rem',
+                    color: '#999',
+                    padding: '0 4px'
+                  }}
+                  title="Sulje esikatselu"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* RPI-näyttöä simuloiva kehys — pystysuunta */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  width: '180px',
+                  height: '320px',          // 9:16 kuvasuhde kuten RPI-näyttö
+                  border: '3px solid #222',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  backgroundColor: '#000',
+                  position: 'relative',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.3)'
+                }}>
+                  
+                  {/* Pieni näyttöpalkki ylös — simuloi TV:n reunaa */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0,
+                    height: '4px',
+                    backgroundColor: '#111',
+                    zIndex: 2
+                  }}/>
+
+                  {/* Kuva */}
+                  {previewType === 'image' && (
+                    <img
+                      src={previewUrl}
+                      alt="Esikatselu"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        backgroundColor: '#000'
+                      }}
+                    />
+                  )}
+
+                  {/* Video */}
+                  {previewType === 'video' && (
+                    <video
+                      src={previewUrl}
+                      controls
+                      muted
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        backgroundColor: '#000'
+                      }}
+                    />
+                  )}
+
+                  {/* PDF — näytetään ikoni koska PDF vaatii pdf.js */}
+                  {previewType === 'pdf' && (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      color: '#fff',
+                      gap: '8px'
+                    }}>
+                      <span style={{ fontSize: '2.5rem' }}>📄</span>
+                      <span style={{ fontSize: '0.7rem', textAlign: 'center', padding: '0 8px' }}>
+                        {file?.name}
+                      </span>
+                      <span style={{ fontSize: '0.65rem', color: '#aaa' }}>
+                        PDF-tiedosto
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Tiedoston perustiedot kehyksen alla */}
+              <div style={{
+                textAlign: 'center',
+                marginTop: '8px',
+                fontSize: '0.75rem',
+                color: '#666'
+              }}>
+                <span>{file?.name}</span>
+                <span style={{ margin: '0 6px' }}>·</span>
+                <span>{file ? (file.size / 1024 / 1024).toFixed(2) + ' Mt' : ''}</span>
+              </div>
+            </div>
+          )}            
 
             {isUploading && (
               <div className="progress-container">

@@ -51,7 +51,7 @@ router.get('/download/:id', authenticateToken, async (req, res) => {
 
     res.set({
       'Content-Type': file.mimeType || 'application/octet-stream',
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(file.originalName)}"`,
+      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(file.originalName)}`,
       'Cache-Control': 'no-cache'
     });
 
