@@ -35,10 +35,14 @@ body {
 .two-column {
   display: flex;
   gap: 2rem;
-  max-width: 1200px;
+  max-width: 1450px;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem;
-  align-items: stretch;
+  padding: 2rem 1.5rem;
+}
+
+.guide, .dashboard {
+  flex: 1;                    /* Molemmat paneelit saman levyiset */
+  display: flex;
 }
 
 /* Molemmat sarakkeet */

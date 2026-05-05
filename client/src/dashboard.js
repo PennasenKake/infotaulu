@@ -6,10 +6,9 @@ function Dashboard({ onLogout, token }) {
   const [file, setFile] = useState(null);
   const [files, setFiles] = useState([]);
   const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
 
@@ -18,28 +17,26 @@ function Dashboard({ onLogout, token }) {
   }, [token]);
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
+    setFile(e.target.files[0]);
     setMessage('');
-    setError('');
+    setError(null);
     setUploadProgress(0);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!file) {
-      setError('Valitse ensin tiedosto');
+      setMessage('Valitse ensin tiedosto');
       return;
     }
     if (!token) {
-      setError('Kirjaudu ensin sisään');
+      setMessage('Kirjaudu ensin sisään');
       return;
     }
 
     setIsUploading(true);
     setMessage('');
-    setError('');
+    setError(null);
     setUploadProgress(0);
 
     const formData = new FormData();
@@ -56,21 +53,20 @@ function Dashboard({ onLogout, token }) {
     };
 
     xhr.onload = () => {
+      setIsUploading(false);
       if (xhr.status === 200 || xhr.status === 201) {
-        setMessage(`Onnistui! Tiedosto: ${file.name}`);
+        setMessage('✅ Tiedosto ladattu onnistuneesti!');
         setFile(null);
         setUploadProgress(0);
         fetchFiles();
       } else {
-        const response = JSON.parse(xhr.responseText || '{}');
-        setError(response.error || 'Lataus epäonnistui');
+        setError('Lataus epäonnistui');
       }
-      setIsUploading(false);
     };
 
     xhr.onerror = () => {
-      setError('Virhe yhteydessä palvelimeen');
       setIsUploading(false);
+      setError('Yhteysvirhe palvelimeen');
     };
 
     xhr.open('POST', `${API_URL}/api/upload`);
@@ -80,12 +76,11 @@ function Dashboard({ onLogout, token }) {
 
   const fetchFiles = async () => {
     if (!token) return;
-    setIsLoading(true);
-    setError('');
 
     try {
       const res = await fetch(`${API_URL}/api/upload`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` },
       });
 
       if (res.status === 401 || res.status === 403) {
@@ -96,9 +91,8 @@ function Dashboard({ onLogout, token }) {
       const data = await res.json();
       setFiles(Array.isArray(data) ? data : []);
     } catch (err) {
+      console.error(err);
       setError('Tiedostojen haku epäonnistui');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -108,7 +102,7 @@ function Dashboard({ onLogout, token }) {
     try {
       const res = await fetch(`${API_URL}/api/upload/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${token}` },
       });
 
       if (!res.ok) throw new Error('Poisto epäonnistui');
@@ -116,15 +110,15 @@ function Dashboard({ onLogout, token }) {
       setMessage('Tiedosto poistettu onnistuneesti');
       fetchFiles();
     } catch (err) {
-      setError(`Virhe poistossa: ${err.message}`);
+      setError(`Poistovirhe: ${err.message}`);
     }
   };
 
   return (
     <div className="App">
-      <div className="two-column sidebar">
+      <div className="two-column">
 
-        {/* Ohjeet */}
+        {/* OHJEPANEELI */}
         <div className="guide">
           <div className="panel">
             <h2 className="panel-title">Ohjeet</h2>
@@ -145,30 +139,20 @@ function Dashboard({ onLogout, token }) {
           </div>
         </div>
 
-        {/* Hallintapaneeli */}
+        {/* HALLINTAPANEELI */}
         <div className="dashboard">
           <div className="panel">
             <h2 className="panel-title">Hallintapaneeli</h2>
 
-            <form onSubmit={handleSubmit} className="upload-form">
-              <div className="file-input-wrapper">
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,video/mp4,application/pdf"
-                  onChange={handleFileChange}
-                  disabled={isUploading}
-                  id="fileInput"
-                />
-                <label htmlFor="fileInput" className="file-label">
-                  {file ? file.name : 'Valitse tiedosto...'}
-                </label>
-              </div>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,video/mp4,application/pdf"
+                onChange={handleFileChange}
+                disabled={isUploading}
+              />
 
-              <button 
-                type="submit" 
-                disabled={!file || isUploading}
-                className="upload-button"
-              >
+              <button type="submit" disabled={!file || isUploading}>
                 {isUploading ? 'Ladataan...' : 'Lataa tiedosto'}
               </button>
             </form>
@@ -177,12 +161,11 @@ function Dashboard({ onLogout, token }) {
             {isUploading && (
               <div className="progress-container">
                 <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
-                    style={{ width: `${uploadProgress}%` }}
-                  />
+                  <div className="progress-fill" style={{ width: `${uploadProgress}%` }} />
                 </div>
-                <span className="progress-text">{uploadProgress}%</span>
+                <div className="progress-text">
+                  Ladataan... {uploadProgress}%
+                </div>
               </div>
             )}
 
@@ -206,10 +189,7 @@ function Dashboard({ onLogout, token }) {
                     <td>{f.uploadedBy}</td>
                     <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>
                     <td>
-                      <button 
-                        className="delete-btn"
-                        onClick={() => handleDelete(f._id)}
-                      >
+                      <button className="delete-btn" onClick={() => handleDelete(f._id)}>
                         Poista
                       </button>
                     </td>
@@ -218,11 +198,11 @@ function Dashboard({ onLogout, token }) {
               </tbody>
             </table>
 
-            <p style={{ marginTop: '2rem' }}>
-              Kirjautunut: <strong>{email}</strong>
+            <p style={{ marginTop: '1.5rem' }}>
+              Kirjautuneena: <strong>{email}</strong>
             </p>
 
-            <button onClick={onLogout} className="logout-btn">
+            <button className="logout-btn" onClick={onLogout}>
               Kirjaudu ulos
             </button>
           </div>
