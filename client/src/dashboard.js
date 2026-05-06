@@ -19,9 +19,10 @@ function Dashboard({ onLogout, token }) {
   const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
 
   useEffect(() => {
-    if (token) 
+    if (token) {
       fetchFiles();
       fetchStorageStats();
+    }
   }, [token]);
 
 
