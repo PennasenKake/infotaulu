@@ -1,72 +1,88 @@
-/* ================================================
-   ETÄHALLITTAVA INFOTAULU — styles.css (LOPUKSI)
-   ================================================ */
+/* ===================================================
+   ETÄHALLITTAVA INFOTAULU — App.css
+   =================================================== */
 
+/* ===== PERUSASETUKSET ===== */
 :root {
   --primary-color: #e30613;
   --primary-hover: #b3050f;
   --bg-color: #f8fafc;
-  --panel-bg: #ffffff;
   --text-main: #1e293b;
   --text-muted: #64748b;
+  --panel-bg: #ffffff;
   --border-color: #e2e8f0;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --radius: 12px;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.1),
+            0 2px 4px -1px rgba(0,0,0,0.06);
 }
 
-* {
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: "Segoe UI", system-ui, sans-serif;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-main);
   line-height: 1.6;
 }
 
+/* ===== APP ===== */
 .App {
   min-height: 100vh;
 }
 
-/* ==================== LAYOUT ==================== */
+/* ===================================================
+   LAYOUT — KAKSI PANEELIA VIEREKKÄIN
+   =================================================== */
+
 .two-column {
   display: flex;
   gap: 2rem;
-  max-width: 1480px;
+  max-width: 1450px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
   align-items: stretch;
-  min-height: calc(100vh - 80px);
 }
 
-.guide, .dashboard, .login {
+/* Kaikki suorat lapset — yhtä leveät */
+.two-column > div {
   flex: 1;
+  min-width: 0;        /* estää ylivuodon pitkillä sanoilla */
   display: flex;
   flex-direction: column;
 }
 
-/* ==================== PANELIT ==================== */
+.guide,
+.dashboard,
+.login {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== PANEL ===== */
 .panel {
   background: var(--panel-bg);
-  border-radius: var(--radius);
+  border-radius: 12px;
   padding: 1.75rem 2rem;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
+  width: 100%;
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
 }
 
+/* ===== OTSIKKO ===== */
 .panel-title {
-  font-size: 1.55rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  margin: 0 0 1.4rem 0;
+  margin: 0 0 1.25rem 0;
   color: var(--text-main);
   position: relative;
-  padding-bottom: 0.8rem;
+  padding-bottom: 0.75rem;
 }
 
 .panel-title::after {
@@ -74,26 +90,29 @@ body {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 55px;
-  height: 3.5px;
+  width: 60px;
+  height: 3px;
   background: var(--primary-color);
-  border-radius: 2px;
 }
 
-/* ==================== OHJEPANEELI ==================== */
-.guide .panel ul {
-  flex-grow: 1;
-  padding-left: 0;
+/* ===================================================
+   LISTAT
+   =================================================== */
+
+.panel ul {
+  list-style: none;
+  padding: 0;
   margin: 0;
 }
 
-.guide .panel li {
-  margin-bottom: 0.85rem;
-  padding-left: 1.6rem;
+.panel li {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
   position: relative;
+  color: var(--text-muted);
 }
 
-.guide .panel li::before {
+.panel li::before {
   content: "•";
   color: var(--primary-color);
   font-weight: bold;
@@ -101,7 +120,124 @@ body {
   left: 0;
 }
 
-/* ==================== UPLOAD & ESKATSELU ==================== */
+/* ===================================================
+   INPUTIT
+   =================================================== */
+
+input[type="email"],
+input[type="text"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  background: #fff;
+  color: var(--text-main);
+}
+
+input[type="text"] {
+  background: #f8fafc;
+  border-style: dashed;
+}
+
+input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(227, 6, 19, 0.12);
+  outline: none;
+}
+
+/* ===================================================
+   NAPIT — PERUSTYYLI
+   TÄRKEÄÄ: ei width:100% globaalisti
+   =================================================== */
+
+button {
+  padding: 0.75rem 1rem;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
+
+
+
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Login-sivun napit saavat täyden leveyden */
+.login .panel button:not(.preview-close-btn) {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+/* ===================================================
+   TEKSTIT JA VIESTIT
+   =================================================== */
+
+.help-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+}
+
+p {
+  margin-top: 1rem;
+}
+
+/* Login-sivun vastausviestit */
+.response-message {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+}
+
+.error-text {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border-left: 4px solid #dc2626;
+}
+
+.success-text {
+  color: #16a34a;
+  background-color: #f0fdf4;
+  border-left: 4px solid #16a34a;
+}
+
+/* Dashboard-viestit */
+.success {
+  color: #16a34a;
+  background-color: #f0fdf4;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border-left: 4px solid #16a34a;
+  margin-top: 0.75rem;
+}
+
+.error {
+  color: #dc2626;
+  background-color: #fef2f2;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border-left: 4px solid #dc2626;
+  margin-top: 0.75rem;
+}
+
+/* ===================================================
+   UPLOAD AREA
+   =================================================== */
+
 .upload-form {
   display: flex;
   flex-direction: column;
@@ -109,164 +245,372 @@ body {
   margin-bottom: 1.5rem;
 }
 
+/* Piilotettu file input, näkyvä label tilalla */
+.file-input-wrapper {
+  position: relative;
+}
+
+.file-input-wrapper input[type="file"] {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
 .file-label {
   display: block;
-  padding: 16px 18px;
+  padding: 14px 16px;
   background-color: #f1f5f9;
   border: 2px dashed #94a3b8;
-  border-radius: 10px;
+  border-radius: 8px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.25s ease;
-  font-size: 1.02rem;
+  transition: all 0.2s ease;
+  font-size: 1rem;
   color: #475569;
+  word-break: break-all;    /* pitkä tiedostonimi ei riko layoutia */
 }
 
 .file-label:hover {
   background-color: #e2e8f0;
   border-color: var(--primary-color);
+  color: var(--text-main);
 }
 
-/* Esikatselu */
-.preview-section {
-  margin: 18px 0;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
+/* Latausnappi — täysi leveys */
+.upload-button {
+  width: 100%;
+  padding: 12px 24px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-/* ==================== PROGRESS BAR ==================== */
+.upload-button:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.upload-button:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* ===================================================
+   PROGRESS BAR
+   =================================================== */
+
 .progress-container {
-  margin: 14px 0 10px;
+  margin: 12px 0;
 }
 
 .progress-bar {
-  height: 11px;
-  background: #e2e8f0;
+  height: 10px;
+  background-color: #e2e8f0;
   border-radius: 9999px;
   overflow: hidden;
+  margin-bottom: 6px;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary-color), #f87171);
-  transition: width 0.35s ease;
+  background: linear-gradient(90deg, var(--primary-color), #f05060);
+  transition: width 0.3s ease;
   border-radius: 9999px;
 }
 
 .progress-text {
   font-size: 0.9rem;
   color: #64748b;
-  text-align: center;
-  margin-top: 4px;
+  font-weight: 500;
 }
 
-/* ==================== TIEDOSTOTAULUKKO ==================== */
+/* ===================================================
+   TIEDOSTOTAULUKKO
+   =================================================== */
+
 .file-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
-  flex-grow: 1;
+  margin-top: 1.5rem;
 }
 
 .file-table th,
 .file-table td {
-  padding: 10px 8px;
+  padding: 12px 8px;
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #e2e8f0;
   vertical-align: middle;
 }
 
 .file-table th {
-  background: #f8fafc;
+  background-color: #f8fafc;
   font-weight: 600;
   color: #475569;
   white-space: nowrap;
 }
 
-/* Sarakkeiden leveydet */
-.file-table th:nth-child(1), .file-table td:nth-child(1) { width: 35%; }
-.file-table th:nth-child(2), .file-table td:nth-child(2) { width: 16%; }
-.file-table th:nth-child(3), .file-table td:nth-child(3) { width: 13%; }
-.file-table th:nth-child(4), .file-table td:nth-child(4) { width: 9%; text-align: center; }
-.file-table th:nth-child(5), .file-table td:nth-child(5) { width: 12%; text-align: center; }
-.file-table th:nth-child(6), .file-table td:nth-child(6) { width: 10%; text-align: center; }
-
-.file-table tr:hover td {
-  background-color: #f1f5f9;
+.file-table tr:last-child td {
+  border-bottom: none;
 }
 
-/* Tiedostonimi linkkinä */
+.file-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* ===================================================
+   TIEDOSTON NIMI — LATAUSLINKKI
+   =================================================== */
+
 .file-download-link {
   background: none;
   border: none;
   color: #2563eb;
   font-weight: 500;
+  text-decoration: none;
   padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
+  transition: all 0.2s ease;
   text-align: left;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* Pitkät nimet */
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+
 }
 
+
+
 .file-download-link:hover {
-  background-color: #eff6ff;
-  color: #1e40af;
+  background-color: #eff6ff;  
+  color: #1d4ed8;
   text-decoration: underline;
 }
 
-/* Muut napit */
-.toggle-btn, .delete-btn, .logout-btn {
+.file-download-link:active {
+  background-color: #dbeafe;
+  transform: translateY(1px);
+}
+
+/* ===================================================
+   NAPIT TAULUKOSSA
+   =================================================== */
+
+.delete-btn {
+  width: auto;
   padding: 5px 12px;
+  background-color: #ef4444;
+  color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
 }
 
-.toggle-btn { background-color: #64748b; color: white; }
-.toggle-btn:hover { background-color: #475569; }
-
-.delete-btn { background-color: #ef4444; color: white; }
-.delete-btn:hover { background-color: #dc2626; }
-
-.logout-btn { background-color: #475569; color: white; }
-.logout-btn:hover { background-color: #334155; }
-
-/* ==================== VIESTIT ==================== */
-.success {
-  color: #166534;
-  background: #f0fdf4;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border-left: 4px solid #16a34a;
+.delete-btn:hover {
+  background-color: #dc2626;
 }
 
-.error {
-  color: #b91c1c;
-  background: #fef2f2;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border-left: 4px solid #ef4444;
+/* Logout */
+.logout-btn {
+  width: auto;
+  padding: 10px 20px;
+  background-color: #475569;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
 }
 
-/* ==================== RESPONSIIVISUUS ==================== */
+.logout-btn:hover {
+  background-color: #334155;
+}
+
+/* ===================================================
+   ESIKATSELU — SULKEMISNAPPI
+   =================================================== */
+
+.preview-close-btn {
+  width: auto !important;
+  background: none !important;
+  color: #94a3b8 !important;
+  padding: 2px 8px !important;
+  font-size: 1.2rem !important;
+  border: none !important;
+  cursor: pointer !important;
+  line-height: 1;
+  border-radius: 4px;
+  flex-shrink: 0;
+  font-weight: 400;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.preview-close-btn:hover {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+}
+
+/* ===================================================
+   ANIMAATIOT
+   =================================================== */
+
+@keyframes shimmer {
+  0%   { left: -100%; }
+  100% { left: 200%; }
+}
+
+@keyframes pulse {
+  0%   { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.5; transform: scale(1.3); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===================================================
+   RESPONSIIVISUUS
+   =================================================== */
+
+/* Tabletti — 768px–1024px */
 @media (max-width: 1024px) {
-  .two-column { gap: 1.5rem; padding: 1.5rem 1rem; }
-}
-
-@media (max-width: 768px) {
   .two-column {
-    flex-direction: column;
     gap: 1.25rem;
-    padding: 1rem 0.75rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .panel {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .panel-title {
+    font-size: 1.25rem;
+  }
+
+  /* Taulukossa lataaja piiloon tabletilla — säästää tilaa */
+  .file-table .lataaja-col {
+    display: none;
   }
 }
 
-@media (max-width: 480px) {
-  .two-column { padding: 0.75rem 0.5rem; }
+/* Mobiili — alle 768px */
+@media (max-width: 768px) {
+  .two-column {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 0.75rem;
+  }
+
+  .guide,
+  .dashboard,
+  .login {
+    width: 100%;
+  }
+
+  .panel {
+    padding: 1.25rem;
+    border-radius: 8px;
+  }
+
+  .panel-title {
+    font-size: 1.2rem;
+  }
+
+  /* Taulukko skrollattavaksi mobiililla */
+  .file-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 1rem;
+  }
+
+  .file-table {
+    min-width: 400px;   /* estää taulukon litistymisen */
+    margin-top: 0;
+  }
+
+  .file-download-link {
+    max-width: 140px;
+    font-size: 0.85rem;
+  }
+
+  /* Logout ja kirjaudu-napit täyteen leveyteen mobiililla */
+  .logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Latausnappi mobiililla */
+  .upload-button {
+    font-size: 1rem;
+    padding: 12px;
+  }
 }
+
+/* Pieni mobiili — alle 480px */
+@media (max-width: 480px) {
+  .two-column {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .panel {
+    padding: 1rem;
+  }
+
+  .panel-title {
+    font-size: 1.1rem;
+  }
+
+  .file-table th,
+  .file-table td {
+    padding: 8px 4px;
+    font-size: 0.85rem;
+  }
+
+  .delete-btn {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+}
+
+
+.toggle-btn {
+  width: auto;
+  padding: 5px 10px;
+  background-color: #64748b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background-color: #475569;
+}
+
