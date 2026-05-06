@@ -12,7 +12,13 @@ const uploadedFileSchema = new mongoose.Schema({
   
   uploadedAt: { type: Date, default: Date.now},
 
+  displaySeconds: { type: Number, default: 8 },
+
+  isActive:       { type: Boolean, default: true }  // ← uusi
+
 });
 
 
 module.exports = mongoose.model('UploadedFile', uploadedFileSchema);
+
+

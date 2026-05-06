@@ -594,3 +594,22 @@ p {
     font-size: 0.8rem;
   }
 }
+
+
+.toggle-btn {
+  width: auto;
+  padding: 5px 10px;
+  background-color: #64748b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background-color: #475569;
+}

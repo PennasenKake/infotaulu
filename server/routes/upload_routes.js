@@ -100,6 +100,53 @@ router.get('/storage/stats', authenticateToken, async (req, res) => {
   }
 });
 
+
+// Vaihda tiedoston tila aktiivinen/piilotettu
+router.patch('/:id/toggle', authenticateToken, async (req, res) => {
+  try {
+    const file = await UploadedFile.findById(req.params.id);
+    if (!file) return res.status(404).json({ error: 'Tiedostoa ei löytynyt' });
+
+    file.isActive = !file.isActive;
+    await file.save();
+
+    res.json({ 
+      message: file.isActive ? 'Tiedosto aktivoitu' : 'Tiedosto piilotettu',
+      isActive: file.isActive 
+    });
+  } catch (err) {
+    console.error('Toggle error:', err);
+    res.status(500).json({ error: 'Tilan vaihto epäonnistui' });
+  }
+});
+
+router.patch('/:id/display-time', authenticateToken, async (req, res) => {
+  try {
+    const { displaySeconds } = req.body;
+
+    if (!displaySeconds || displaySeconds < 5 || displaySeconds > 600) {
+      return res.status(400).json({ 
+        error: 'Esitysajan tulee olla 5–600 sekuntia' 
+      });
+    }
+
+    const file = await UploadedFile.findByIdAndUpdate(
+      req.params.id,
+      { displaySeconds: Math.round(displaySeconds) },
+      { new: true }
+    );
+
+    if (!file) return res.status(404).json({ error: 'Tiedostoa ei löytynyt' });
+
+    res.json({ 
+      message: 'Esitysaika päivitetty',
+      displaySeconds: file.displaySeconds 
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Päivitys epäonnistui' });
+  }
+});
+
 // Suojatut reitit
 router.get('/', authenticateToken, listFiles);
 router.post('/', authenticateToken, upload.single('file'), uploadFile);

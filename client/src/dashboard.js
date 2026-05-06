@@ -190,6 +190,48 @@ const handleFileChange = (e) => {
     }
   };
 
+  const handleToggle = async (id, currentState) => {
+    try {
+      const res = await fetch(`${API_URL}/api/upload/${id}/toggle`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Tilan vaihto epäonnistui');
+      
+      setFiles(prev => prev.map(f =>
+        f._id === id ? { ...f, isActive: !f.isActive } : f
+      ));
+    } catch (err) {
+      setError(`Virhe: ${err.message}`);
+    }
+  };
+
+
+  const handleDisplayTimeChange = async (id, seconds) => {
+    const value = parseInt(seconds);
+    if (isNaN(value) || value < 5 || value > 600) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/upload/${id}/display-time`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ displaySeconds: value })
+      });
+
+      if (!res.ok) throw new Error('Päivitys epäonnistui');
+
+      setFiles(prev => prev.map(f =>
+        f._id === id ? { ...f, displaySeconds: value } : f
+      ));
+    } catch (err) {
+      setError(`Virhe: ${err.message}`);
+    }
+  };  
+
+
   return (
     <div className="App">
       <div className="two-column">
@@ -199,6 +241,7 @@ const handleFileChange = (e) => {
           <div className="panel">
             <h2 className="panel-title">Ohjeet</h2>
 
+          <br />
 
             {/* Levytilan seuranta */}
             {storageStats && (
@@ -261,6 +304,8 @@ const handleFileChange = (e) => {
                 )}
               </div>
             )}
+
+              <br />
 
               <ul>
                 <li><strong>Lataa tiedostoja</strong> painamalla "Valitse tiedosto" -kenttää ja valitsemalla kuva tai video tietokoneeltasi.</li>
@@ -453,22 +498,57 @@ const handleFileChange = (e) => {
                   <th>Nimi</th>
                   <th>Lataaja</th>
                   <th>Päivä</th>
-                  <th></th>
+                  <th>Aika</th>
+                  <th>Aktiivinen</th>
+                  <th>Poista</th>
                 </tr>
               </thead>
               <tbody>
                 {files.map((f) => (
-                  <tr key={f._id}>
+                  <tr key={f._id} style={{ 
+                    opacity: f.isActive === false ? 0.45 : 1,
+                    transition: 'opacity 0.2s ease'
+                  }}>
                     <td>
-                      <button 
+                      <button
                         className="file-download-link"
                         onClick={() => handleDownload(f._id, f.originalName)}
+                        style={{ 
+                          textDecoration: f.isActive === false ? 'line-through' : 'none',
+                          color: f.isActive === false ? '#94a3b8' : '#2563eb'
+                        }}
                       >
                         {f.originalName}
                       </button>
                     </td>
                     <td>{f.uploadedBy}</td>
                     <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>
+                    
+                    <td>
+                      <input type="number" min="5" max="600"
+                        defaultValue={f.displaySeconds || 8}
+                        onBlur={(e) => handleDisplayTimeChange(f._id, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleDisplayTimeChange(f._id, e.target.value);
+                            e.target.blur();
+                          }
+                        }}
+                        style={{ width: '58px', padding: '4px 6px', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '0.85rem', textAlign: 'center'
+                        }}
+                      />
+                    </td>            
+
+                    <td>
+                      <button
+                        className="toggle-btn"
+                        onClick={() => handleToggle(f._id, f.isActive)}
+                        title={f.isActive === false ? 'Aktivoi esitykseen' : 'Piilota esityksestä'}
+                      >
+                        {f.isActive === false ? '▶ Näytä' : '⏸ Piilota'}
+                      </button>
+                    </td>
+                    
                     <td>
                       <button 
                         className="delete-btn"
