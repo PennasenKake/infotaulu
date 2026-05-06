@@ -72,6 +72,34 @@ router.get('/download/:id', authenticateToken, async (req, res) => {
   }
 });
 
+
+// Levytilan seuranta
+router.get('/storage/stats', authenticateToken, async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const stats = await db.stats();
+
+    // MongoDB Atlas free tier — 512 Mt
+    const TOTAL_BYTES = 512 * 1024 * 1024;
+    const usedBytes = stats.dataSize + stats.indexSize;
+    const freeBytes = Math.max(0, TOTAL_BYTES - usedBytes);
+    const usedPercent = Math.min(100, Math.round((usedBytes / TOTAL_BYTES) * 100));
+
+    res.json({
+      used: usedBytes,
+      free: freeBytes,
+      total: TOTAL_BYTES,
+      usedPercent,
+      // Luettava muoto
+      usedMB: (usedBytes / 1024 / 1024).toFixed(1),
+      totalMB: (TOTAL_BYTES / 1024 / 1024).toFixed(0),
+    });
+  } catch (err) {
+    console.error('Storage stats error:', err);
+    res.status(500).json({ error: 'Levytilan haku epäonnistui' });
+  }
+});
+
 // Suojatut reitit
 router.get('/', authenticateToken, listFiles);
 router.post('/', authenticateToken, upload.single('file'), uploadFile);

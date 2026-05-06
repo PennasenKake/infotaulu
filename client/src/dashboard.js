@@ -13,11 +13,32 @@ function Dashboard({ onLogout, token }) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewType, setPreviewType] = useState(null); // 'image', 'video', 'pdf'
 
+  const [storageStats, setStorageStats] = useState(null);
+
+
   const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
 
   useEffect(() => {
-    if (token) fetchFiles();
+    if (token) 
+      fetchFiles();
+      fetchStorageStats();
   }, [token]);
+
+
+  const fetchStorageStats = async () => {
+  try {
+    const res = await fetch(`${API_URL}/api/upload/storage/stats`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setStorageStats(data);
+    }
+  } catch (err) {
+    console.error('Storage stats fetch failed:', err);
+  }
+};
+
 
 const handleFileChange = (e) => {
   const selectedFile = e.target.files[0];
@@ -84,6 +105,7 @@ const handleFileChange = (e) => {
         setPreviewUrl(null);   // tyhjennä esikatselu
         setPreviewType(null);        
         fetchFiles();
+        fetchStorageStats();
       } else {
         setError('Lataus epäonnistui');
         setUploadProgress(0);
@@ -133,6 +155,7 @@ const handleFileChange = (e) => {
 
       setMessage('Tiedosto poistettu onnistuneesti');
       fetchFiles();
+      fetchStorageStats();
     } catch (err) {
       setError(`Poistovirhe: ${err.message}`);
     }
@@ -196,6 +219,69 @@ const handleFileChange = (e) => {
         <div className="dashboard">
           <div className="panel">
             <h2 className="panel-title">Hallintapaneeli</h2>
+
+            {/* Levytilan seuranta */}
+            {storageStats && (
+              <div style={{ marginBottom: '1rem' }}>
+
+                {/* Otsikkorivi */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '6px'
+                }}>
+                  <span style={{
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    color: '#475569'
+                  }}>
+                    💾 Tallennustila
+                  </span>
+                  <span style={{
+                    fontSize: '0.8rem',
+                    color: storageStats.usedPercent > 80 ? '#dc2626' :
+                          storageStats.usedPercent > 60 ? '#d97706' : '#64748b'
+                  }}>
+                    {storageStats.usedMB} Mt / {storageStats.totalMB} Mt
+                  </span>
+                </div>
+
+                {/* Progress bar */}
+                <div style={{
+                  height: '10px',
+                  backgroundColor: '#e2e8f0',
+                  borderRadius: '9999px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    width: `${storageStats.usedPercent}%`,
+                    height: '100%',
+                    borderRadius: '9999px',
+                    transition: 'width 0.5s ease',
+                    background:
+                      storageStats.usedPercent > 80
+                        ? '#dc2626'                                    // punainen — täynnä
+                        : storageStats.usedPercent > 60
+                        ? 'linear-gradient(90deg, #f59e0b, #d97706)'  // oranssi — varoitus
+                        : 'linear-gradient(90deg, #22c55e, #16a34a)'  // vihreä — ok
+                  }}/>
+                </div>
+
+                {/* Varoitusviesti */}
+                {storageStats.usedPercent > 80 && (
+                  <p style={{
+                    fontSize: '0.75rem',
+                    color: '#dc2626',
+                    marginTop: '4px',
+                    marginBottom: 0
+                  }}>
+                    ⚠️ Tallennustila on lähes täynnä — poista vanhoja tiedostoja
+                  </p>
+                )}
+              </div>
+            )}
+
 
             <form onSubmit={handleSubmit} className="upload-form">
               <div className="file-input-wrapper">
