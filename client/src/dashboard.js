@@ -522,11 +522,11 @@ const handleFileChange = (e) => {
                       </button>
                     </td>
 
-                    <td style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                    <td style={{ fontSize: '0.95rem', color: '#64748b' }}>
                       {f.uploadedBy.split('@')[0]}
                     </td>
 
-                    <td style={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                    <td style={{ fontSize: '0.95rem', whiteSpace: 'nowrap' }}>
                       {new Date(f.uploadedAt).toLocaleDateString('fi-FI', { 
                         day: 'numeric', month: 'numeric' 
                       })}{' '}
@@ -559,11 +559,11 @@ const handleFileChange = (e) => {
                             padding: '4px 4px', 
                             border: '1px solid #e2e8f0', 
                             borderRadius: '4px', 
-                            fontSize: '0.82rem', 
+                            fontSize: '0.92rem', 
                             textAlign: 'center'
                           }}
                         />
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>s</span>
+                        <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>s</span>
 
                         {/* Erotin */}
                         <span style={{ color: '#cbd5e1', fontSize: '0.9rem' }}>|</span>
