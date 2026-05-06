@@ -522,7 +522,7 @@ const handleFileChange = (e) => {
                       </button>
                     </td>
 
-                    <td style={{ fontSize: '0.95rem', color: '#64748b' }}>
+                    <td style={{ fontSize: '1rem', color: '#000000' }}>
                       {f.uploadedBy.split('@')[0]}
                     </td>
 
