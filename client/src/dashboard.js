@@ -494,16 +494,15 @@ const handleFileChange = (e) => {
 
             {/* Tiedostolista */}
             <table className="file-table">
-              <thead>
-                <tr>
-                  <th>Nimi</th>
-                  <th>Lataaja</th>
-                  <th>Päivä</th>
-                  <th>Aika</th>
-                  <th>Aktiivinen</th>
-                  <th>Poista</th>
-                </tr>
-              </thead>
+            <thead>
+              <tr>
+                <th>Nimi</th>
+                <th>Lataaja</th>
+                <th>Päivä</th>
+                <th>Aika | Tila</th>
+                <th>Poista</th>
+              </tr>
+            </thead>
               <tbody>
                 {files.map((f) => (
                   <tr key={f._id} style={{ 
@@ -522,33 +521,63 @@ const handleFileChange = (e) => {
                         {f.originalName}
                       </button>
                     </td>
-                    <td>{f.uploadedBy}</td>
-                    <td>{new Date(f.uploadedAt).toLocaleString('fi-FI')}</td>
-                    
-                    <td>
-                      <input type="number" min="5" max="600"
-                        defaultValue={f.displaySeconds || 8}
-                        onBlur={(e) => handleDisplayTimeChange(f._id, e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleDisplayTimeChange(f._id, e.target.value);
-                            e.target.blur();
-                          }
-                        }}
-                        style={{ width: '58px', padding: '4px 6px', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '0.85rem', textAlign: 'center'
-                        }}
-                      />
-                    </td>            
+
+                    <td style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                      {f.uploadedBy.split('@')[0]}
+                    </td>
+
+                    <td style={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                      {new Date(f.uploadedAt).toLocaleDateString('fi-FI', { 
+                        day: 'numeric', month: 'numeric' 
+                      })}{' '}
+                      {new Date(f.uploadedAt).toLocaleTimeString('fi-FI', { 
+                        hour: '2-digit', minute: '2-digit' 
+                      })}
+                    </td>     
 
                     <td>
-                      <button
-                        className="toggle-btn"
-                        onClick={() => handleToggle(f._id, f.isActive)}
-                        title={f.isActive === false ? 'Aktivoi esitykseen' : 'Piilota esityksestä'}
-                      >
-                        {f.isActive === false ? '▶ Näytä' : '⏸ Piilota'}
-                      </button>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        <input 
+                          type="number" 
+                          min="5" 
+                          max="600"
+                          defaultValue={f.displaySeconds || 8}
+                          onBlur={(e) => handleDisplayTimeChange(f._id, e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleDisplayTimeChange(f._id, e.target.value);
+                              e.target.blur();
+                            }
+                          }}
+                          style={{ 
+                            width: '52px', 
+                            padding: '4px 4px', 
+                            border: '1px solid #e2e8f0', 
+                            borderRadius: '4px', 
+                            fontSize: '0.82rem', 
+                            textAlign: 'center'
+                          }}
+                        />
+                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>s</span>
+
+                        {/* Erotin */}
+                        <span style={{ color: '#cbd5e1', fontSize: '0.9rem' }}>|</span>
+
+                        <button
+                          className="toggle-btn"
+                          onClick={() => handleToggle(f._id, f.isActive)}
+                          title={f.isActive === false ? 'Aktivoi esitykseen' : 'Piilota esityksestä'}
+                        >
+                          {f.isActive === false ? '▶ Näytä' : '⏸ Piilota'}
+                        </button>
+                      </div>
                     </td>
+
                     
                     <td>
                       <button 
