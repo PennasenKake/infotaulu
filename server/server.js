@@ -7,6 +7,9 @@ const { connectDB } = require('./config/db'); // Yhteys tietokantaan
 const authRoutes = require('./routes/auth_routes'); // Kirjautumis ja otp reitit
 const uploadRoutes = require('./routes/upload_routes'); // Tiedoston lataus reitit
 
+const heartbeatRoutes = require('./routes/heartbeat_routes');
+app.use('/api/heartbeat', heartbeatRoutes);
+
 const app = express();
 const port = process.env.PORT || 5000; 
 

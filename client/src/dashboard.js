@@ -15,6 +15,8 @@ function Dashboard({ onLogout, token }) {
 
   const [storageStats, setStorageStats] = useState(null);
 
+  const [deviceStatus, setDeviceStatus] = useState(null);
+
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
 
@@ -22,6 +24,9 @@ function Dashboard({ onLogout, token }) {
     if (token) {
       fetchFiles();
       fetchStorageStats();
+      fetchDeviceStatus();
+      const interval = setInterval(fetchDeviceStatus, 30000); 
+      return () => clearInterval(interval);
     }
   }, [token]);
 
@@ -232,6 +237,19 @@ const handleFileChange = (e) => {
     }
   };  
 
+  const fetchDeviceStatus = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/heartbeat/status`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDeviceStatus(data);
+      }
+    } catch (err) {
+      console.error('Device status fetch failed:', err);
+    }
+  };
 
   return (
     <div className="App">
@@ -241,6 +259,55 @@ const handleFileChange = (e) => {
         <div className="guide">
           <div className="panel">
             <h2 className="panel-title">Ohjeet</h2>
+          <br />
+
+          {/* Laitteen tila */}
+          {deviceStatus && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 14px',
+              backgroundColor: deviceStatus.online ? '#f0fff4' : '#fff5f5',
+              border: `1px solid ${deviceStatus.online ? '#22c55e' : '#ef4444'}`,
+              borderRadius: '8px',
+              marginTop: '1rem',
+              marginBottom: '0.5rem'
+            }}>
+              {/* Vilkkuva piste */}
+              <div style={{
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                backgroundColor: deviceStatus.online ? '#22c55e' : '#ef4444',
+                animation: deviceStatus.online ? 'pulse 2s infinite' : 'none',
+                flexShrink: 0
+              }}/>
+
+              <div style={{ flex: 1 }}>
+                <strong style={{ 
+                  color: deviceStatus.online ? '#15803d' : '#b91c1c',
+                  fontSize: '0.9rem'
+                }}>
+                  Infotaulu: {deviceStatus.online ? '🟢 Online' : '🔴 Offline'}
+                </strong>
+
+                <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                  {deviceStatus.lastSeen ? (
+                    <>
+                      Viimeksi nähty:{' '}
+                      {new Date(deviceStatus.lastSeen).toLocaleString('fi-FI')}
+                      {deviceStatus.syncedFiles > 0 && (
+                        <> · {deviceStatus.syncedFiles} tiedostoa</>
+                      )}
+                    </>
+                  ) : (
+                    'Laitetta ei ole vielä yhdistetty'
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <br />
 
@@ -327,7 +394,7 @@ const handleFileChange = (e) => {
                 </li>
 
                 <li>
-                  Tiedostot <strong>näkyvät infotaululla automaattisesti</strong> 
+                  Tiedostot <strong>näkyvät infotaululla automaattisesti </strong> 
                   muutaman minuutin sisällä (Raspberry Pi -laitteella).
                 </li>
 
