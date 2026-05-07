@@ -8,7 +8,6 @@ const authRoutes = require('./routes/auth_routes'); // Kirjautumis ja otp reitit
 const uploadRoutes = require('./routes/upload_routes'); // Tiedoston lataus reitit
 
 const heartbeatRoutes = require('./routes/heartbeat_routes');
-app.use('/api/heartbeat', heartbeatRoutes);
 
 const app = express();
 const port = process.env.PORT || 5000; 
@@ -30,6 +29,7 @@ app.use(express.json());
 // API-Reitit
 app.use('/api/auth', authRoutes); // kirjautuminen
 app.use('/api/upload', uploadRoutes); // tiedoston lataus
+app.use('/api/heartbeat', heartbeatRoutes);
 
 
 // Palvelimen käynnistys 
