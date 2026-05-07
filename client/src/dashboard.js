@@ -259,7 +259,6 @@ const handleFileChange = (e) => {
         <div className="guide">
           <div className="panel">
             <h2 className="panel-title">Ohjeet</h2>
-          <br />
 
           {/* Laitteen tila */}
           {deviceStatus && (
