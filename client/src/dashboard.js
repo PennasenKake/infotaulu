@@ -309,17 +309,50 @@ const handleFileChange = (e) => {
               <br />
 
               <ul>
-                <li><strong>Lataa tiedostoja</strong> painamalla "Valitse tiedosto" -kenttää ja valitsemalla kuva tai video tietokoneeltasi.</li>
-                <li><strong>Sallitut tiedostotyypit</strong>: vain JPG, PNG ja MP4 (max. koko ~50 Mt).</li>
-                <li>Paina <strong>“Lataa”</strong>-nappia – tiedosto siirtyy palvelimelle.</li>
-                <li>Onnistuessaan näet viestin “Onnistui! Tiedosto: [tiedostonimi]” ja tiedosto ilmestyy listaan heti.</li>
-                <li>Tiedostot <strong>näkyvät infotaululla automaattisesti</strong> (Raspberry Pi -laitteella).</li>
-                <li>Poistaaksesi tiedoston:
-                    <ul style={{ marginTop: '0.5rem' }}>
-                        <li>Klikkaa tiedoston rivillä olevaa <strong>“Poista”</strong>-nappia</li>
-                        <li>Vahvista poistaminen ponnahdusikkunassa</li>
-                        <li>Tiedosto katoaa listasta ja infotaululta</li>
-                    </ul>
+                <li>
+                  <strong>Lataa tiedostoja</strong> painamalla "Valitse tiedosto" 
+                  -kenttää ja valitsemalla tiedosto tietokoneeltasi. Esikatselu 
+                  näyttää miltä tiedosto näyttää infotaululla ennen latausta.
+                </li>
+
+                <li>
+                  <strong>Sallitut tiedostotyypit</strong>: JPG, PNG, MP4 ja PDF 
+                  (max. koko 50 Mt).
+                </li>
+
+                <li>
+                  Paina <strong>"Lataa tiedosto"</strong> -nappia – latauksen 
+                  eteneminen näkyy edistymispalkissa. Tiedosto ilmestyy listaan 
+                  heti latauksen jälkeen.
+                </li>
+
+                <li>
+                  Tiedostot <strong>näkyvät infotaululla automaattisesti</strong> 
+                  muutaman minuutin sisällä (Raspberry Pi -laitteella).
+                </li>
+
+                <li>
+                  <strong>Esitysaika</strong> — muuta tiedoston rivillä olevaa 
+                  lukua (sekunteina) ja paina Enter. Oletusaika on 8 sekuntia. 
+                  Videot toistuvat aina loppuun asti riippumatta asetetusta ajasta.
+                </li>
+
+                <li>
+                  <strong>Piilota / Näytä</strong> — ⏸-nappi piilottaa tiedoston 
+                  esityksestä poistamatta sitä järjestelmästä. ▶-nappi tuo sen 
+                  takaisin. Piilotettu tiedosto näkyy listassa himmennettynä.
+                </li>
+
+                <li>
+                  <strong>Lataa tiedosto omalle koneelle</strong> — klikkaa 
+                  tiedostonimeä listassa ladataksesi alkuperäisen tiedoston.
+                </li>
+
+                <li>
+                  <strong>Poista tiedosto</strong> pysyvästi painamalla 
+                  <strong> "Poista"</strong>-nappia ja vahvistamalla poistaminen. 
+                  Tiedosto häviää listasta ja infotaululta seuraavan 
+                  synkronoinnin jälkeen.
                 </li>
               </ul>
 
