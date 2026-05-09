@@ -523,14 +523,12 @@ function Dashboard({ onLogout, token }) {
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
 
-            {/* ✅ Tiedostolista — taulukko skrollattavassa containerissa */}
             <div className="file-table-wrapper">
               <table className="file-table">
                 <thead>
                   <tr>
                     <th>Nimi</th>
-                    {/* ✅ Lataaja ja Päivä yhdistetty */}
-                    <th>Lataaja / Päivä</th>
+                    <th>Lataaja | Päivä</th>
                     <th>Aika | Tila</th>
                     <th>Vanhenee</th>
                     <th>Poista</th>
@@ -557,7 +555,6 @@ function Dashboard({ onLogout, token }) {
                         </button>
                       </td>
 
-                      {/* ✅ Yhdistetty Lataaja + Päivä -sarake */}
                       <td>
                         <div style={{ fontSize: '0.88rem', color: '#1e293b', fontWeight: '500' }}>
                           {f.uploadedBy.split('@')[0]}
@@ -597,7 +594,7 @@ function Dashboard({ onLogout, token }) {
                             }}
                           />
                           <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>s</span>
-                          <span style={{ color: '#cbd5e1', fontSize: '0.85rem' }}>|</span>
+                          <span style={{ color: '#cbd5e1', fontSize: '0.85rem' }}>| </span>
                           <button
                             className="toggle-btn"
                             onClick={() => handleToggle(f._id)}
