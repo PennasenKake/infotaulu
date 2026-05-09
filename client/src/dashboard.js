@@ -397,49 +397,53 @@ function Dashboard({ onLogout, token }) {
                 {isUploading ? 'Ladataan...' : 'Lataa tiedosto'}
               </button>
 
-              {/* Voimassaoloaika — valinnainen */}
-              <div style={{ marginTop: '8px' }}>
-                <label style={{
-                  fontSize: '0.85rem',
-                  color: '#475569',
-                  display: 'block',
-                  marginBottom: '4px'
-                }}>
-                  Poistuu automaattisesti (valinnainen):
-                </label>
-                <input
-                  type="date"
-                  value={expiresAt}
-                  min={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => setExpiresAt(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    color: expiresAt ? '#1e293b' : '#94a3b8'
-                  }}
-                />
-                {expiresAt && (
-                  <button
-                    type="button"
-                    onClick={() => setExpiresAt('')}
+              {/* Voimassaoloaika — näkyy vain kun tiedosto on valittu */}
+              {file && (
+                <div style={{ marginTop: '8px' }}>
+                  <label style={{
+                    fontSize: '0.85rem',
+                    color: '#475569',
+                    display: 'block',
+                    marginBottom: '4px'
+                  }}>
+                    Poistuu automaattisesti (valinnainen):
+                  </label>
+                  <input
+                    type="date"
+                    value={expiresAt}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setExpiresAt(e.target.value)}
+                    title="Aseta päivämäärä jolloin tiedosto poistetaan automaattisesti. Jätä tyhjäksi jos tiedoston ei haluta vanhentuvan."
                     style={{
-                      marginTop: '4px',
-                      background: 'none',
-                      border: 'none',
-                      color: '#94a3b8',
-                      fontSize: '0.8rem',
-                      cursor: 'pointer',
-                      padding: '2px 0',
-                      width: 'auto'
+                      width: '100%',
+                      padding: '8px 10px',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      fontSize: '0.9rem',
+                      color: expiresAt ? '#1e293b' : '#94a3b8'
                     }}
-                  >
-                    ✕ Poista päivämäärä
-                  </button>
-                )}
-              </div>
+                  />
+                  {expiresAt && (
+                    <button
+                      type="button"
+                      onClick={() => setExpiresAt('')}
+                      style={{
+                        marginTop: '4px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#94a3b8',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer',
+                        padding: '2px 0',
+                        width: 'auto'
+                      }}
+                    >
+                      ✕ Poista päivämäärä
+                    </button>
+                  )}
+                </div>
+              )}
+
             </form>
 
             {/* Esikatselu */}
@@ -546,6 +550,11 @@ function Dashboard({ onLogout, token }) {
                         <button
                           className="file-download-link"
                           onClick={() => handleDownload(f._id, f.originalName)}
+                          title={
+                            f.isActive === false 
+                              ? `${f.originalName} — piilotettu esityksestä. Klikkaa ladataksesi.`
+                              : `Lataa ${f.originalName} omalle koneelle`
+                          }
                           style={{
                             textDecoration: f.isActive === false ? 'line-through' : 'none',
                             color: f.isActive === false ? '#94a3b8' : '#2563eb'
@@ -580,6 +589,7 @@ function Dashboard({ onLogout, token }) {
                             min="5"
                             max="600"
                             defaultValue={f.displaySeconds || 8}
+                            title={`Esitysaika sekunteina (5–600). Nykyinen: ${f.displaySeconds || 8} s. Muuta kirjoittamalla uusi arvo ja paina Enter.`}
                             onBlur={(e) => handleDisplayTimeChange(f._id, e.target.value)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
