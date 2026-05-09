@@ -56,6 +56,7 @@ const uploadFile = async (req, res) => {
             mimeType: req.file.mimetype,
             size: req.file.size,
             uploadedBy,
+            expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null
             // uploadedAt: automaattisesti schema.default(Date.now)
           });
 

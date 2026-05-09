@@ -1,16 +1,20 @@
 const express = require('express');
 const cors = require('cors');
+const cron = require('node-cron');
 require('dotenv').config();
 
 
 const { connectDB } = require('./config/db'); // Yhteys tietokantaan
 const authRoutes = require('./routes/auth_routes'); // Kirjautumis ja otp reitit
 const uploadRoutes = require('./routes/upload_routes'); // Tiedoston lataus reitit
-
+const UploadedFile = require('./models/uploadedFile');
 const heartbeatRoutes = require('./routes/heartbeat_routes');
 
 const app = express();
 const port = process.env.PORT || 5000; 
+
+const {getGridFSBucket} = require('./config/db');
+const mongoose = require('mongoose');
 
 const allowedOrigins = [
   'https://www.sprinfotaulu.fi',
@@ -31,6 +35,44 @@ app.use('/api/auth', authRoutes); // kirjautuminen
 app.use('/api/upload', uploadRoutes); // tiedoston lataus
 app.use('/api/heartbeat', heartbeatRoutes);
 
+
+// Tarkistaa vanhentuneet tiedostot kerran tunnissa
+cron.schedule('0 * * * *', async () => {
+  console.log('Tarkistetaan vanhentuneet tiedostot...');
+  try {
+    const expired = await UploadedFile.find({
+      expiresAt: { 
+        $ne: null,           // ei null
+        $lte: new Date()     // vanhentunut
+      }
+    });
+
+    if (expired.length === 0) {
+      console.log('Ei vanhentuneita tiedostoja');
+      return;
+    }
+
+    const bucket = getGridFSBucket();
+
+    for (const file of expired) {
+      try {
+        // Poista GridFS:stä
+        await bucket.delete(
+          new mongoose.Types.ObjectId(file.filename)
+        );
+        // Poista metadata
+        await file.deleteOne();
+        console.log(`Poistettu vanhentunut: ${file.originalName}`);
+      } catch (err) {
+        console.error(`Virhe poistettaessa ${file.originalName}:`, err);
+      }
+    }
+
+    console.log(`Poistettu ${expired.length} vanhentunutta tiedostoa`);
+  } catch (err) {
+    console.error('Cron-ajo epäonnistui:', err);
+  }
+});
 
 // Palvelimen käynnistys 
 const startServer = async () => {

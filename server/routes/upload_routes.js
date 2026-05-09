@@ -147,6 +147,27 @@ router.patch('/:id/display-time', authenticateToken, async (req, res) => {
   }
 });
 
+router.patch('/:id/expires', authenticateToken, async (req, res) => {
+  try {
+    const { expiresAt } = req.body;
+
+    const file = await UploadedFile.findByIdAndUpdate(
+      req.params.id,
+      { expiresAt: expiresAt ? new Date(expiresAt) : null },
+      { new: true }
+    );
+
+    if (!file) return res.status(404).json({ error: 'Tiedostoa ei löytynyt' });
+
+    res.json({ 
+      message: expiresAt ? 'Voimassaoloaika asetettu' : 'Voimassaoloaika poistettu',
+      expiresAt: file.expiresAt 
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Päivitys epäonnistui' });
+  }
+});
+
 // Suojatut reitit
 router.get('/', authenticateToken, listFiles);
 router.post('/', authenticateToken, upload.single('file'), uploadFile);

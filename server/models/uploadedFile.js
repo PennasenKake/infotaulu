@@ -12,10 +12,11 @@ const uploadedFileSchema = new mongoose.Schema({
   
   uploadedAt: { type: Date, default: Date.now},
 
-  displaySeconds: { type: Number, default: 8 },
+  displaySeconds: { type: Number, default: 10 },
 
-  isActive:       { type: Boolean, default: true }  // ← uusi
+  isActive:       { type: Boolean, default: true },  
 
+  expiresAt:      { type: Date, default: null } 
 });
 
 

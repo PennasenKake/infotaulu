@@ -9,13 +9,11 @@ function Dashboard({ onLogout, token }) {
   const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewType, setPreviewType] = useState(null); // 'image', 'video', 'pdf'
-
   const [storageStats, setStorageStats] = useState(null);
-
   const [deviceStatus, setDeviceStatus] = useState(null);
+  const [expiresAt, setExpiresAt] = useState('');
 
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
@@ -92,6 +90,8 @@ const handleFileChange = (e) => {
     formData.append('file', file);
     formData.append('uploadedBy', email);
 
+if (expiresAt) formData.append('expiresAt', expiresAt);
+
     const xhr = new XMLHttpRequest();
 
     xhr.upload.onprogress = (event) => {
@@ -107,6 +107,7 @@ const handleFileChange = (e) => {
         setUploadProgress(100); // näytä 100% hetki
         setTimeout(() => setUploadProgress(0), 1000); // nollaa sekunnin kuluttua
         setMessage('✅ Tiedosto ladattu onnistuneesti!');
+        setExpiresAt('');
         setFile(null);
         setPreviewUrl(null);   // tyhjennä esikatselu
         setPreviewType(null);        
@@ -451,6 +452,52 @@ const handleFileChange = (e) => {
               >
                 {isUploading ? 'Ladataan...' : 'Lataa tiedosto'}
               </button>
+
+              {/* Voimassaoloaika — valinnainen */}
+              <div style={{ marginTop: '8px' }}>
+                <label style={{ 
+                  fontSize: '0.85rem', 
+                  color: '#475569',
+                  display: 'block',
+                  marginBottom: '4px'
+                }}>
+                  Poistuu automaattisesti (valinnainen):
+                </label>
+                <input
+                  type="date"
+                  value={expiresAt}
+                  min={new Date().toISOString().split('T')[0]} // ei mennyttä päivää
+                  onChange={(e) => setExpiresAt(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 10px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    fontSize: '0.9rem',
+                    color: expiresAt ? '#1e293b' : '#94a3b8'
+                  }}
+                />
+                {expiresAt && (
+                  <button
+                    type="button"
+                    onClick={() => setExpiresAt('')}
+                    style={{
+                      marginTop: '4px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#94a3b8',
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      padding: '2px 0',
+                      width: 'auto'
+                    }}
+                  >
+                    ✕ Poista päivämäärä
+                  </button>
+                )}
+              </div>
+
+
             </form>
 
           {/* Esikatselu */}
@@ -599,6 +646,7 @@ const handleFileChange = (e) => {
                 <th>Lataaja</th>
                 <th>Päivä</th>
                 <th>Aika | Tila</th>
+                <th>Vanhenee</th>
                 <th>Poista</th>
               </tr>
             </thead>
@@ -677,6 +725,19 @@ const handleFileChange = (e) => {
                       </div>
                     </td>
 
+                    <td style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                      {f.expiresAt ? (
+                        <span style={{ 
+                          color: new Date(f.expiresAt) < new Date(Date.now() + 86400000) 
+                            ? '#dc2626'   // punainen jos alle vuorokausi jäljellä
+                            : '#64748b'
+                        }}>
+                          {new Date(f.expiresAt).toLocaleDateString('fi-FI')}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#cbd5e1' }}>—</span>
+                      )}
+                    </td>
                     
                     <td>
                       <button 
