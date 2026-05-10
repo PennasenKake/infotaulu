@@ -38,7 +38,7 @@ useEffect(() => {
   if (!loginTime) return;
 
   const remaining =
-    10 * 60 * 1000 - (Date.now() - parseInt(loginTime));
+    15 * 60 * 1000 - (Date.now() - parseInt(loginTime));
 
   if (remaining <= 0) {
     logout();
