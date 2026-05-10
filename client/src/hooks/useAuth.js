@@ -30,7 +30,7 @@ export const useAuth = (API_URL) => {
     }
   }, []);
 
-// 10 minuutin automaattinen uloskirjautuminen
+// 15 minuutin automaattinen uloskirjautuminen
 useEffect(() => {
   if (!isAuthenticated || !token) return;
 
@@ -47,7 +47,7 @@ useEffect(() => {
 
   const timeout = setTimeout(() => {
     logout();
-    alert('Sessio on vanhentunut (10 minuuttia)');
+    alert('Sessio on vanhentunut (15 minuuttia)');
   }, remaining);
 
   return () => clearTimeout(timeout);

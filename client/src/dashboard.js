@@ -190,11 +190,12 @@ function Dashboard({ onLogout, token }) {
                 näyttää miltä tiedosto näyttää infotaululla ennen latausta.
               </li>
               <li>
-                Voit määrittää päivämäärän, jolloin tiedosto poistetaan esityksestä. Päivämaaraton tiedosto ei poisteta esityksestä.
-              </li>
-              <li>
                 <strong>Sallitut tiedostotyypit</strong>: JPG, PNG, MP4 ja PDF
                 (max. koko 50 Mt).
+              </li>
+              <li>
+                Voit <strong>määrittää päivämäärän</strong>, jolloin tiedosto poistetaan esityksestä. 
+                Päivämäärätön tiedosto ei poisteta esityksestä.
               </li>
               <li>
                 Paina <strong>"Lataa tiedosto"</strong> -nappia – latauksen
@@ -202,12 +203,12 @@ function Dashboard({ onLogout, token }) {
                 heti latauksen jälkeen.
               </li>
               <li>
-                Tiedostot <strong>näkyvät infotaululla automaattisesti</strong>
+                Tiedostot <strong>näkyvät infotaululla automaattisesti </strong>
                 muutaman minuutin sisällä (Raspberry Pi -laitteella).
               </li>
               <li>
                 <strong>Esitysaika</strong> — muuta tiedoston rivillä olevaa
-                lukua (sekunteina) ja paina Enter. Oletusaika on 8 sekuntia.
+                lukua (sekunteina) ja paina Enter. Oletusaika on 10 sekuntia.
                 Videot toistuvat aina loppuun asti riippumatta asetetusta ajasta.
               </li>
               <li>
@@ -224,6 +225,14 @@ function Dashboard({ onLogout, token }) {
                 <strong> "Poista"</strong>-nappia ja vahvistamalla poistaminen.
                 Tiedosto häviää listasta ja infotaululta seuraavan
                 synkronoinnin jälkeen.
+              </li>
+              <li>
+                <strong>Muuta: </strong> Jos Infotaulu on offline tilassa, synkronointi ei onnisti
+                Tämä johtuu todennäköisesti, etta järjestelmä ei ole yhteydessä Internetiin.
+                Tai laite ei ole päällä
+              </li>
+              <li>
+                <strong>Ongelma tilanteissa ole yhteydessä järjestelmän ylläpitäjään</strong> 
               </li>
             </ul>
             
