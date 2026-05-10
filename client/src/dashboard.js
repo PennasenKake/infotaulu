@@ -190,6 +190,9 @@ function Dashboard({ onLogout, token }) {
                 näyttää miltä tiedosto näyttää infotaululla ennen latausta.
               </li>
               <li>
+                Voit määrittää päivämäärän, jolloin tiedosto poistetaan esityksestä. Päivämaaraton tiedosto ei poisteta esityksestä.
+              </li>
+              <li>
                 <strong>Sallitut tiedostotyypit</strong>: JPG, PNG, MP4 ja PDF
                 (max. koko 50 Mt).
               </li>
