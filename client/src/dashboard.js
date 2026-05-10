@@ -307,7 +307,7 @@ function Dashboard({ onLogout, token }) {
                 color: '#64748b',
                 marginLeft: '8px'
               }}>
-                ({files.filter(f => f.isActive !== false).length} aktiivista)
+             {/*   ({files.filter(f => f.isActive !== false).length} aktiivista) */}
               </span>
             </h2>
 
