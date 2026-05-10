@@ -16,7 +16,9 @@ const uploadedFileSchema = new mongoose.Schema({
 
   isActive:       { type: Boolean, default: true },  
 
-  expiresAt:      { type: Date, default: null } 
+  expiresAt:      { type: Date, default: null },
+
+  sortOrder:      { type: Number, default: 0 }
 });
 
 

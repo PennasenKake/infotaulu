@@ -168,6 +168,29 @@ router.patch('/:id/expires', authenticateToken, async (req, res) => {
   }
 });
 
+
+// Tallenna uusi järjestys
+router.patch('/reorder', authenticateToken, async (req, res) => {
+  try {
+    const { orderedIds } = req.body;
+
+    if (!Array.isArray(orderedIds)) {
+      return res.status(400).json({ error: 'orderedIds täytyy olla taulukko' });
+    }
+
+    // Päivitä jokaisen tiedoston sortOrder sen indeksin mukaan
+    const updates = orderedIds.map((id, index) =>
+      UploadedFile.findByIdAndUpdate(id, { sortOrder: index })
+    );
+    await Promise.all(updates);
+
+    res.json({ message: 'Järjestys tallennettu' });
+  } catch (err) {
+    console.error('Reorder error:', err);
+    res.status(500).json({ error: 'Järjestyksen tallennus epäonnistui' });
+  }
+});
+
 // Suojatut reitit
 router.get('/', authenticateToken, listFiles);
 router.post('/', authenticateToken, upload.single('file'), uploadFile);

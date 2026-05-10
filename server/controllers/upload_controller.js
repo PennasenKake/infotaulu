@@ -99,12 +99,16 @@ const uploadFile = async (req, res) => {
 
 const listFiles = async (req, res) => {
   try {
-    const files = await UploadedFile.find().sort({ uploadedAt: -1 });
+    const files = await UploadedFile
+      .find()
+      .sort({ sortOrder: 1, uploadedAt: -1 }) // sortOrder ensin, sitten uploadedAt
+      .select('filename originalName mimeType size uploadedBy uploadedAt displaySeconds isActive expiresAt sortOrder');
     res.json(files);
   } catch (err) {
     res.status(500).json({ error: 'Tiedostojen haku epäonnistui' });
   }
 };
+
 
 const deleteFile = async (req, res) => {
   try {

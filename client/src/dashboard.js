@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+
 import DeviceStatus from './components/DeviceStatus';
 import StorageBar from './components/StorageBar';
 import FileUploadForm from './components/FileUploadForm';
-import FileTable from './components/FileTable';
+import SortableRow from './components/SortableRow';
 
 function Dashboard({ onLogout, token }) {
   const email = localStorage.getItem('authenticatedEmail') || 'Tuntematon käyttäjä';
@@ -103,7 +118,10 @@ function Dashboard({ onLogout, token }) {
         setUploadProgress(0);
       }
     };
-    xhr.onerror = () => { setIsUploading(false); setError('Yhteysvirhe palvelimeen'); };
+    xhr.onerror = () => {
+      setIsUploading(false);
+      setError('Yhteysvirhe palvelimeen');
+    };
     xhr.open('POST', `${API_URL}/api/upload`);
     xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.send(formData);
@@ -169,7 +187,44 @@ function Dashboard({ onLogout, token }) {
     } catch (err) { setError(`Virhe: ${err.message}`); }
   };
 
-    return (
+  // ── Drag & Drop ───────────────────────────────────────
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = files.findIndex(f => f._id === active.id);
+    const newIndex = files.findIndex(f => f._id === over.id);
+    const newFiles = arrayMove(files, oldIndex, newIndex);
+
+    setFiles(newFiles);
+
+    try {
+      const res = await fetch(`${API_URL}/api/upload/reorder`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ orderedIds: newFiles.map(f => f._id) })
+      });
+      if (!res.ok) throw new Error('Järjestyksen tallennus epäonnistui');
+    } catch (err) {
+      setError(`Virhe: ${err.message}`);
+      fetchFiles(); // Palauta alkuperäinen järjestys
+    }
+  };
+  // ─────────────────────────────────────────────────────
+
+  return (
     <div className="App">
       <div className="two-column">
 
@@ -180,9 +235,7 @@ function Dashboard({ onLogout, token }) {
             <DeviceStatus deviceStatus={deviceStatus} />
             <br />
             <StorageBar storageStats={storageStats} />
-            
             <br />
-
             <ul>
               <li>
                 <strong>Lataa tiedostoja</strong> painamalla "Valitse tiedosto"
@@ -194,8 +247,9 @@ function Dashboard({ onLogout, token }) {
                 (max. koko 50 Mt).
               </li>
               <li>
-                Voit <strong>määrittää päivämäärän</strong>, jolloin tiedosto poistetaan esityksestä. 
-                Päivämäärätön tiedosto ei poisteta esityksestä.
+                Voit <strong>määrittää päivämäärän</strong>, jolloin tiedosto
+                poistetaan esityksestä automaattisesti.
+                Päivämäärätön tiedosto ei poistu automaattisesti.
               </li>
               <li>
                 Paina <strong>"Lataa tiedosto"</strong> -nappia – latauksen
@@ -203,13 +257,17 @@ function Dashboard({ onLogout, token }) {
                 heti latauksen jälkeen.
               </li>
               <li>
-                Tiedostot <strong>näkyvät infotaululla automaattisesti </strong>
+                Tiedostot <strong>näkyvät infotaululla automaattisesti</strong>{' '}
                 muutaman minuutin sisällä (Raspberry Pi -laitteella).
               </li>
               <li>
                 <strong>Esitysaika</strong> — muuta tiedoston rivillä olevaa
                 lukua (sekunteina) ja paina Enter. Oletusaika on 10 sekuntia.
-                Videot toistuvat aina loppuun asti riippumatta asetetusta ajasta.
+                Videot toistuvat aina loppuun asti.
+              </li>
+              <li>
+                <strong>Järjestys</strong> — raahaa tiedoston rivillä olevasta
+                ⋮⋮-ikonista muuttaaksesi esitysjärjestystä infotaululla.
               </li>
               <li>
                 <strong>Piilota / Näytä</strong> — ⏸-nappi piilottaa tiedoston
@@ -218,33 +276,41 @@ function Dashboard({ onLogout, token }) {
               </li>
               <li>
                 <strong>Lataa tiedosto omalle koneelle</strong> — klikkaa
-                tiedostonimeä listassa ladataksesi alkuperäisen tiedoston.
+                tiedostonimeä listassa.
               </li>
               <li>
-                <strong>Poista tiedosto</strong> pysyvästi painamalla
-                <strong> "Poista"</strong>-nappia ja vahvistamalla poistaminen.
-                Tiedosto häviää listasta ja infotaululta seuraavan
-                synkronoinnin jälkeen.
+                <strong>Poista tiedosto</strong> pysyvästi painamalla{' '}
+                <strong>"Poista"</strong>-nappia ja vahvistamalla poistaminen.
               </li>
               <li>
-                <strong>Muuta: </strong> Jos Infotaulu on offline tilassa, synkronointi ei onnisti
-                Tämä johtuu todennäköisesti, etta järjestelmä ei ole yhteydessä Internetiin.
-                Tai laite ei ole päällä
+                <strong>Offline-tila:</strong> Jos infotaulu näkyy punaisena,
+                laite ei ole yhteydessä internetiin tai se ei ole päällä.
+                Esitys voi silti toimia paikallisella sisällöllä.
               </li>
               <li>
-                <strong>Ongelma tilanteissa ole yhteydessä järjestelmän ylläpitäjään</strong> 
+                <strong>Ongelmatilanteissa</strong> ota yhteyttä järjestelmän
+                ylläpitäjään.
               </li>
             </ul>
-            
             <br />
-
           </div>
         </div>
 
         {/* HALLINTAPANEELI */}
         <div className="dashboard">
           <div className="panel">
-            <h2 className="panel-title">Hallintapaneeli</h2>
+            <h2 className="panel-title">
+              Hallintapaneeli
+              <span style={{
+                fontSize: '0.8rem',
+                fontWeight: '400',
+                color: '#64748b',
+                marginLeft: '8px'
+              }}>
+                ({files.filter(f => f.isActive !== false).length} aktiivista)
+              </span>
+            </h2>
+
             <FileUploadForm
               file={file}
               expiresAt={expiresAt}
@@ -263,13 +329,61 @@ function Dashboard({ onLogout, token }) {
                 setFile(null);
               }}
             />
-            <FileTable
-              files={files}
-              onDelete={handleDelete}
-              onDownload={handleDownload}
-              onToggle={handleToggle}
-              onDisplayTimeChange={handleDisplayTimeChange}
-            />
+
+            {/* Tiedostolista drag & drop -tuella */}
+            <div className="file-table-wrapper">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <table className="file-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '32px' }}></th>
+                      <th style={{ width: '28px' }}>#</th>
+                      <th>Nimi</th>
+                      <th>Lataaja | Päivä</th>
+                      <th>Aika | Tila</th>
+                      <th>Vanhenee</th>
+                      <th>Poista</th>
+                    </tr>
+                  </thead>
+                  <SortableContext
+                    items={files.map(f => f._id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <tbody>
+                      {files.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" style={{
+                            textAlign: 'center',
+                            padding: '2rem',
+                            color: '#94a3b8',
+                            fontStyle: 'italic'
+                          }}>
+                            Ei tiedostoja — lataa ensimmäinen tiedosto yllä
+                          </td>
+                        </tr>
+                      ) : (
+                        files.map((f, index) => (
+                          <SortableRow
+                            key={f._id}
+                            f={f}
+                            index={index}
+                            onDownload={handleDownload}
+                            onToggle={handleToggle}
+                            onDisplayTimeChange={handleDisplayTimeChange}
+                            onDelete={handleDelete}
+                          />
+                        ))
+                      )}
+                    </tbody>
+                  </SortableContext>
+                </table>
+              </DndContext>
+            </div>
+
             <p style={{ marginTop: '1.5rem' }}>
               Kirjautuneena: <strong>{email}</strong>
             </p>
