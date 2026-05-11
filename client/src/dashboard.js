@@ -18,6 +18,7 @@ import DeviceStatus from './components/DeviceStatus';
 import StorageBar from './components/StorageBar';
 import FileUploadForm from './components/FileUploadForm';
 import SortableRow from './components/SortableRow';
+import AIAssistant from './components/AIAssistant';
 
 function Dashboard({ onLogout, token }) {
   const email = localStorage.getItem('authenticatedEmail') || 'Tuntematon käyttäjä';
@@ -310,6 +311,10 @@ function Dashboard({ onLogout, token }) {
              {/*   ({files.filter(f => f.isActive !== false).length} aktiivista) */}
               </span>
             </h2>
+
+            <br />
+              <AIAssistant token={token} apiUrl={API_URL}  onUploadSuccess={fetchFiles} />
+            <br />
 
             <FileUploadForm
               file={file}
