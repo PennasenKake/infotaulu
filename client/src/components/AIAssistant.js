@@ -260,36 +260,35 @@ export default function AIAssistant({ token, apiUrl, onUploadSuccess }) {
   const [open, setOpen] = useState(false);
 
   // Generoi teksti backendiltä
-  const handleGenerate = async () => {
-    if (!prompt.trim()) return;
-    setLoading(true);
-    setError('');
-    setResult(null);
-    setUploadMsg('');
+const handleGenerate = async () => {
+  if (!prompt.trim()) return;
+  setLoading(true);
+  setError('');
+  setResult(null);
 
-    try {
-      const res = await fetch(`${apiUrl}/api/ai/generate`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ prompt: prompt.trim() })
-      });
+  try {
+    const res = await fetch(`${apiUrl}/api/ai/generate`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ prompt: prompt.trim() })
+    });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || `Virhe (${res.status})`);
-      }
+    const data = await res.json();
 
-      const data = await res.json();
-      setResult(data);
-    } catch (err) {
-      setError(err.message || 'AI-generointi epäonnistui');
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      throw new Error(data.error || `Virhe (${res.status})`);
     }
-  };
+
+    setResult(data);
+  } catch (err) {
+    setError(err.message || 'AI-generointi epäonnistui');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Lataa generoitu HTML-sisältö järjestelmään
   const handleUpload = async () => {
