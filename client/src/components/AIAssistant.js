@@ -1,465 +1,562 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 
-// ── Brändivärit ja fontit ────────────────────────────
-const BRAND = {
-  red:        '#e30613',
-  darkRed:    '#b3050f',
-  white:      '#ffffff',
-  lightGray:  '#f5f5f5',
-  darkGray:   '#222222',
-  fontTitle:  'bold 52px Arial',
-  fontBody:   '34px Arial',
-  fontSmall:  '24px Arial',
-};
+// ─────────────────────────────────────────────────────────────────
+// Brändätty HTML-pohja infotaululle (9:16 pystysuunta)
+// SPR Nilsiän osaston värit ja tyyli
+// ─────────────────────────────────────────────────────────────────
+function generateBrandedHTML({ otsikko, sisalto, kehotus, template }) {
+  const templates = {
 
-// ── Valmiit pohjat ───────────────────────────────────
-const TEMPLATES = [
-  { label: 'Verenluovutus',   value: 'Luo lyhyt ja kannustava ilmoitus verenluovutustapahtumasta SPR Nilsiän osastolle.' },
-  { label: 'Ensiapukurssi',   value: 'Luo kutsu ensiapukurssille. Korosta käytännönläheisyyttä ja hyödyllisyyttä arjessa.' },
-  { label: 'Ystäväkerho',     value: 'Luo lämmin kutsu SPR:n ystäväkerhoon yksinäisille tai uusille asukkaille.' },
-  { label: 'Tapahtuma',       value: 'Luo yleinen tapahtumailmoitus SPR Nilsiän osastolle. Positiivinen ja kutsuva sävy.' },
-  { label: 'Vapaaehtoistyo',  value: 'Luo rekrytointi-ilmoitus vapaaehtoistyöhön. Kerro merkityksellisyydestä ja yhteisöllisyydestä.' },
-];
-
-// ── System prompt ────────────────────────────────────
-const SYSTEM_PROMPT = `Olet Suomen Punaisen Ristin Nilsiän osaston virallinen viestintäavustaja.
-Tehtäväsi on luoda lyhyttä, selkeää ja kannustavaa sisältöä infotaulunäyttöä varten.
-
-Säännöt:
-- Käytä lämmintä, asiallista ja positiivista sävyä
-- Tekstit ovat lyhyitä — infotaululle sopii max 2–3 lausetta
-- Älä käytä liiallista virallisuutta
-- Aloita aina positiivisesti
-- Vastaa AINA seuraavassa JSON-muodossa ilman muuta tekstiä:
-{
-  "otsikko": "Lyhyt, iskevä otsikko (max 40 merkkiä)",
-  "teksti": "Pääviesti infotaululle (max 180 merkkiä)",
-  "hashtagt": "#spr #nilsia #vapaaehtoistyo"
-}`;
-
-// ── Canvas-renderöinti ───────────────────────────────
-function renderToCanvas(canvas, { otsikko, teksti, hashtagt }) {
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width;
-  const H = canvas.height;
-
-  // Tausta
-  ctx.fillStyle = BRAND.white;
-  ctx.fillRect(0, 0, W, H);
-
-  // Punainen yläpalkki
-  ctx.fillStyle = BRAND.red;
-  ctx.fillRect(0, 0, W, 140);
-
-  // SPR-teksti palkissa
-  ctx.fillStyle = BRAND.white;
-  ctx.font = 'bold 36px Arial';
-  ctx.textAlign = 'left';
-  ctx.fillText('Suomen Punainen Risti · Nilsiän osasto', 40, 90);
-
-  // Punainen risti -symboli oikealle
-  ctx.font = 'bold 80px Arial';
-  ctx.textAlign = 'right';
-  ctx.fillText('✚', W - 40, 110);
-
-  // Otsikko
-  ctx.fillStyle = BRAND.red;
-  ctx.font = BRAND.fontTitle;
-  ctx.textAlign = 'left';
-  wrapText(ctx, otsikko, 40, 220, W - 80, 60);
-
-  // Erotusviiva
-  ctx.strokeStyle = BRAND.red;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(40, 300);
-  ctx.lineTo(W - 40, 300);
-  ctx.stroke();
-
-  // Leipäteksti
-  ctx.fillStyle = BRAND.darkGray;
-  ctx.font = BRAND.fontBody;
-  wrapText(ctx, teksti, 40, 360, W - 80, 44);
-
-  // Hashtagit
-  ctx.fillStyle = '#999';
-  ctx.font = BRAND.fontSmall;
-  ctx.fillText(hashtagt, 40, H - 60);
-
-  // Alakehys
-  ctx.fillStyle = BRAND.red;
-  ctx.fillRect(0, H - 20, W, 20);
-}
-
-function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-  const words = text.split(' ');
-  let line = '';
-  let currentY = y;
-  for (let n = 0; n < words.length; n++) {
-    const testLine = line + words[n] + ' ';
-    if (ctx.measureText(testLine).width > maxWidth && n > 0) {
-      ctx.fillText(line, x, currentY);
-      line = words[n] + ' ';
-      currentY += lineHeight;
-    } else {
-      line = testLine;
+    // Punainen otsikkokortti — yleisin
+    perus: `<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #1a1a2e;
+      width: 1080px; height: 1920px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 80px;
     }
-  }
-  ctx.fillText(line, x, currentY);
+    .card {
+      background: #fff;
+      border-radius: 24px;
+      overflow: hidden;
+      width: 100%;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+    }
+    .header {
+      background: #e30613;
+      padding: 60px 64px 48px;
+    }
+    .logo-bar {
+      display: flex; align-items: center;
+      gap: 16px; margin-bottom: 40px;
+    }
+    .logo-circle {
+      width: 56px; height: 56px;
+      background: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 800; color: #e30613;
+      flex-shrink: 0;
+    }
+    .org-name {
+      color: rgba(255,255,255,0.9);
+      font-size: 28px; font-weight: 600; line-height: 1.2;
+    }
+    .title {
+      color: #fff;
+      font-size: 72px; font-weight: 800;
+      line-height: 1.1; letter-spacing: -1px;
+    }
+    .body {
+      padding: 64px; background: #fff;
+    }
+    .content {
+      font-size: 44px; color: #1e293b;
+      line-height: 1.55; font-weight: 400;
+      margin-bottom: 48px;
+    }
+    .cta {
+      display: inline-block;
+      background: #e30613; color: #fff;
+      font-size: 36px; font-weight: 700;
+      padding: 28px 52px; border-radius: 60px;
+    }
+    .footer {
+      padding: 32px 64px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-text { color: #94a3b8; font-size: 26px; }
+    .cross {
+      color: #e30613; font-size: 36px; font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="logo-bar">
+        <div class="logo-circle">✚</div>
+        <div class="org-name">Suomen Punainen Risti<br>Nilsiän osasto</div>
+      </div>
+      <div class="title">${otsikko}</div>
+    </div>
+    <div class="body">
+      <div class="content">${sisalto.replace(/\n/g, '<br>')}</div>
+      ${kehotus ? `<div class="cta">${kehotus}</div>` : ''}
+    </div>
+    <div class="footer">
+      <span class="footer-text">sprinfotaulu.fi</span>
+      <span class="cross">✚</span>
+    </div>
+  </div>
+</body>
+</html>`,
+
+    // Tumma teema — tapahtumailmoitukset
+    tumma: `<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #0f172a;
+      width: 1080px; height: 1920px;
+      display: flex; flex-direction: column;
+      align-items: stretch; justify-content: space-between;
+      padding: 0;
+    }
+    .top-bar {
+      background: #e30613;
+      padding: 40px 64px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .top-bar-text { color: #fff; font-size: 30px; font-weight: 600; }
+    .main {
+      flex: 1; padding: 80px 64px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .title {
+      color: #fff; font-size: 80px; font-weight: 800;
+      line-height: 1.05; margin-bottom: 48px;
+      letter-spacing: -2px;
+    }
+    .divider {
+      width: 80px; height: 6px;
+      background: #e30613; border-radius: 3px;
+      margin-bottom: 48px;
+    }
+    .content {
+      color: #cbd5e1; font-size: 46px;
+      line-height: 1.55; font-weight: 400;
+    }
+    .cta {
+      margin-top: 64px;
+      background: #e30613; color: #fff;
+      font-size: 38px; font-weight: 700;
+      padding: 32px 56px; border-radius: 12px;
+      display: inline-block; width: fit-content;
+    }
+    .bottom {
+      padding: 40px 64px;
+      border-top: 1px solid #1e293b;
+      display: flex; justify-content: space-between;
+    }
+    .bottom-text { color: #475569; font-size: 26px; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <span style="font-size:36px; color:#fff;">✚</span>
+    <span class="top-bar-text">Suomen Punainen Risti — Nilsiän osasto</span>
+  </div>
+  <div class="main">
+    <div class="title">${otsikko}</div>
+    <div class="divider"></div>
+    <div class="content">${sisalto.replace(/\n/g, '<br>')}</div>
+    ${kehotus ? `<div class="cta">${kehotus}</div>` : ''}
+  </div>
+  <div class="bottom">
+    <span class="bottom-text">sprinfotaulu.fi</span>
+    <span class="bottom-text">✚ SPR Nilsiä</span>
+  </div>
+</body>
+</html>`,
+
+    // Minimalistinen — ilmoitukset ja tiedotteet
+    minimalistinen: `<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #fff;
+      width: 1080px; height: 1920px;
+      display: flex; flex-direction: column;
+    }
+    .side-bar {
+      position: fixed; left: 0; top: 0; bottom: 0;
+      width: 16px; background: #e30613;
+    }
+    .content-wrap {
+      flex: 1; padding: 120px 80px 80px 96px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .tag {
+      background: #fef2f2; color: #e30613;
+      font-size: 28px; font-weight: 700;
+      padding: 12px 28px; border-radius: 60px;
+      display: inline-block; margin-bottom: 56px;
+      text-transform: uppercase; letter-spacing: 2px;
+    }
+    .title {
+      font-size: 88px; font-weight: 800;
+      color: #0f172a; line-height: 1.0;
+      letter-spacing: -3px; margin-bottom: 56px;
+    }
+    .content {
+      font-size: 48px; color: #334155;
+      line-height: 1.6; font-weight: 400;
+    }
+    .cta {
+      margin-top: 72px;
+      color: #e30613; font-size: 40px; font-weight: 700;
+      border-bottom: 3px solid #e30613;
+      display: inline-block; padding-bottom: 4px;
+    }
+    .footer {
+      padding: 48px 80px 48px 96px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 1px solid #f1f5f9;
+    }
+    .footer-org { font-size: 26px; color: #94a3b8; font-weight: 500; }
+    .footer-cross { font-size: 40px; color: #e30613; }
+  </style>
+</head>
+<body>
+  <div class="side-bar"></div>
+  <div class="content-wrap">
+    <div class="tag">✚ SPR Nilsiä</div>
+    <div class="title">${otsikko}</div>
+    <div class="content">${sisalto.replace(/\n/g, '<br>')}</div>
+    ${kehotus ? `<div class="cta">${kehotus} →</div>` : ''}
+  </div>
+  <div class="footer">
+    <span class="footer-org">sprinfotaulu.fi</span>
+    <span class="footer-cross">✚</span>
+  </div>
+</body>
+</html>`
+  };
+
+  return templates[template] || templates.perus;
 }
 
-// ── Pääkomponentti ───────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// AIAssistant-komponentti
+// ─────────────────────────────────────────────────────────────────
 export default function AIAssistant({ token, apiUrl, onUploadSuccess }) {
-  const [isOpen, setIsOpen]     = useState(false);
-  const [prompt, setPrompt]     = useState('');
-  const [loading, setLoading]   = useState(false);
-  const [result, setResult]     = useState(null);
-  const [error, setError]       = useState(null);
+  const [prompt, setPrompt] = useState('');
+  const [result, setResult] = useState(null);        // { otsikko, sisalto, kehotus }
+  const [template, setTemplate] = useState('perus');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState('');
-  const canvasRef = useRef(null);
+  const [open, setOpen] = useState(false);
 
-  // Renderöi canvas aina kun result muuttuu
-  useEffect(() => {
-    if (result && canvasRef.current) {
-      renderToCanvas(canvasRef.current, result);
-    }
-  }, [result]);
-
+  // Generoi teksti backendiltä
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     setLoading(true);
-    setError(null);
+    setError('');
     setResult(null);
     setUploadMsg('');
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch(`${apiUrl}/api/ai/generate`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.REACT_APP_ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 500,
-          system: SYSTEM_PROMPT,
-          messages: [
-            { role: 'user', content: prompt }
-          ]
-        })
+        body: JSON.stringify({ prompt: prompt.trim() })
       });
 
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Virhe (${res.status})`);
+      }
+
       const data = await res.json();
-      const text = data.content[0].text;
-
-      // Siivoa mahdolliset ```json ... ``` -kehykset
-      const clean = text.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
-      setResult(parsed);
-
+      setResult(data);
     } catch (err) {
-      console.error(err);
-      setError('Generointi epäonnistui. Tarkista API-avain ja yritä uudelleen.');
+      setError(err.message || 'AI-generointi epäonnistui');
     } finally {
       setLoading(false);
     }
   };
 
-  // Muunna canvas PNG:ksi ja lataa hallintaan
-  const handleUploadToBoard = async () => {
-    if (!canvasRef.current || !result) return;
+  // Lataa generoitu HTML-sisältö järjestelmään
+  const handleUpload = async () => {
+    if (!result) return;
     setUploading(true);
     setUploadMsg('');
 
+    const html = generateBrandedHTML({ ...result, template });
+    const blob = new Blob([html], { type: 'text/html' });
+
+    // Tiedostonimi otsikosta
+    const safeName = result.otsikko
+      .toLowerCase()
+      .replace(/[^a-zäöå0-9]/g, '_')
+      .replace(/_+/g, '_')
+      .substring(0, 40);
+    const filename = `ai_${safeName}_${Date.now()}.html`;
+    const file = new File([blob], filename, { type: 'text/html' });
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('uploadedBy', 'ai-assistantti');
+
     try {
-      // Canvas → Blob
-      const blob = await new Promise((resolve) =>
-        canvasRef.current.toBlob(resolve, 'image/png')
-      );
-
-      const filename = `AI_${result.otsikko.replace(/\s+/g, '_').slice(0, 30)}_${Date.now()}.png`;
-      const file = new File([blob], filename, { type: 'image/png' });
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('uploadedBy', 'AI-avustaja');
-
       const res = await fetch(`${apiUrl}/api/upload`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
-        body: formData,
+        body: formData
       });
 
       if (!res.ok) throw new Error('Lataus epäonnistui');
-
-      setUploadMsg('✅ Lisätty infotaululle!');
-      if (onUploadSuccess) onUploadSuccess(); // päivitä tiedostolista
-
+      setUploadMsg('✅ Sisältö ladattu infotaululle!');
+      if (onUploadSuccess) onUploadSuccess();
     } catch (err) {
-      setUploadMsg(`❌ Virhe: ${err.message}`);
+      setUploadMsg(`❌ ${err.message}`);
     } finally {
       setUploading(false);
     }
   };
 
+  // Lataa HTML omalle koneelle
+  const handleDownloadHTML = () => {
+    if (!result) return;
+    const html = generateBrandedHTML({ ...result, template });
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `infotaulu_${Date.now()}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const TEMPLATES = [
+    { id: 'perus',         label: '🟥 Punainen kortti' },
+    { id: 'tumma',         label: '⬛ Tumma teema' },
+    { id: 'minimalistinen', label: '⬜ Minimalistinen' },
+  ];
+
+  const ESIMERKIT = [
+    'Ensiapukurssi lokakuussa — kerro päivämäärä ja ilmoittautuminen',
+    'Verenluovutuspäivä marraskuussa — rohkaise osallistumaan',
+    'Ystäväkerho kokoontuu — kerro aika ja paikka',
+    'Tarvitsemme uusia vapaaehtoisia — kutsu mukaan toimintaan',
+  ];
+
   return (
-    <>
-      {/* Avauspainike */}
+    <div style={{
+      border: '1px solid #e2e8f0',
+      borderRadius: '12px',
+      overflow: 'hidden',
+      marginBottom: '8px'
+    }}>
+
+      {/* Otsikkorivi — avaa/sulkee */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => setOpen(o => !o)}
         style={{
-          width: 'auto',
-          padding: '8px 16px',
-          backgroundColor: '#7c3aed',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          fontSize: '0.9rem',
-          fontWeight: '600',
-          cursor: 'pointer',
-          marginBottom: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px'
+          width: '100%', textAlign: 'left',
+          padding: '14px 18px',
+          background: open ? '#fef2f2' : '#f8fafc',
+          border: 'none', cursor: 'pointer',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          borderBottom: open ? '1px solid #fecaca' : 'none'
         }}
       >
-        ✨ AI-sisältöavustaja
+        <span style={{ fontWeight: '600', fontSize: '0.95rem', color: '#1e293b' }}>
+          ✨ AI-sisältöapuri
+        </span>
+        <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
+          {open ? '▲ Sulje' : '▼ Avaa'}
+        </span>
       </button>
 
-      {/* Sivupaneeli */}
-      {isOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0, right: 0,
-          width: '420px',
-          height: '100vh',
-          backgroundColor: '#fff',
-          boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
-          zIndex: 1000,
-          display: 'flex',
-          flexDirection: 'column',
-          overflowY: 'auto'
-        }}>
+      {open && (
+        <div style={{ padding: '18px', background: '#fff' }}>
 
-          {/* Header */}
-          <div style={{
-            backgroundColor: '#7c3aed',
-            padding: '16px 20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexShrink: 0
-          }}>
-            <span style={{ color: 'white', fontWeight: '700', fontSize: '1rem' }}>
-              ✨ AI-sisältöavustaja
-            </span>
-            <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                background: 'none', border: 'none',
-                color: 'white', fontSize: '1.4rem',
-                cursor: 'pointer', width: 'auto', padding: '0 4px'
-              }}
-            >
-              ✕
-            </button>
+          {/* Kuvauskenttä */}
+          <label style={{ fontSize: '0.83rem', color: '#475569', display: 'block', marginBottom: '6px', fontWeight: '600' }}>
+            Kuvaile sisältö suomeksi:
+          </label>
+          <textarea
+            value={prompt}
+            onChange={e => setPrompt(e.target.value)}
+            placeholder="Esim: Ensiapukurssi järjestetään 15. lokakuuta Nilsiän palotalonparkin kokoussalissa. Ilmoittaudu viimeistään 10.10."
+            rows={3}
+            style={{
+              width: '100%', padding: '10px 12px',
+              border: '2px solid #e2e8f0', borderRadius: '8px',
+              fontSize: '0.88rem', lineHeight: '1.5',
+              resize: 'vertical', fontFamily: 'inherit',
+              color: '#1e293b'
+            }}
+            onFocus={e => e.target.style.borderColor = '#e30613'}
+            onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+          />
+
+          {/* Esimerkkipainikkeet */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '8px 0 12px' }}>
+            {ESIMERKIT.map((ex, i) => (
+              <button
+                key={i}
+                onClick={() => setPrompt(ex)}
+                style={{
+                  padding: '4px 10px', fontSize: '0.75rem',
+                  background: '#f1f5f9', border: '1px solid #e2e8f0',
+                  borderRadius: '20px', cursor: 'pointer', color: '#475569',
+                  fontWeight: '500', width: 'auto'
+                }}
+              >
+                {ex.split('—')[0].trim()}
+              </button>
+            ))}
           </div>
 
-          {/* Sisältö */}
-          <div style={{ padding: '20px', flex: 1 }}>
+          {/* Generoi-nappi */}
+          <button
+            onClick={handleGenerate}
+            disabled={loading || !prompt.trim()}
+            style={{
+              width: '100%', padding: '11px',
+              background: loading || !prompt.trim() ? '#94a3b8' : '#e30613',
+              color: '#fff', border: 'none', borderRadius: '8px',
+              fontSize: '0.95rem', fontWeight: '700', cursor: 'pointer'
+            }}
+          >
+            {loading ? '⏳ Generoidaan...' : '✨ Luo sisältö'}
+          </button>
 
-            {/* Valmiit pohjat */}
-            <label style={{ fontSize: '0.85rem', color: '#475569', fontWeight: '600' }}>
-              Valitse pohja tai kirjoita oma:
-            </label>
-            <select
-              onChange={(e) => setPrompt(e.target.value)}
-              defaultValue=""
-              style={{
-                width: '100%', padding: '8px 10px',
-                border: '1px solid #e2e8f0', borderRadius: '6px',
-                fontSize: '0.9rem', marginTop: '6px', marginBottom: '12px',
-                color: '#1e293b'
-              }}
-            >
-              <option value="">Valitse pohja...</option>
-              {TEMPLATES.map(t => (
-                <option key={t.label} value={t.value}>{t.label}</option>
-              ))}
-            </select>
+          {error && (
+            <p style={{ color: '#dc2626', fontSize: '0.83rem', marginTop: '8px' }}>{error}</p>
+          )}
 
-            {/* Vapaa tekstikenttä */}
-            <textarea
-              placeholder="Kirjoita aihe tai kuvaus..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              rows={4}
-              style={{
-                width: '100%', padding: '10px',
-                border: '1px solid #e2e8f0', borderRadius: '6px',
-                fontSize: '0.9rem', resize: 'vertical',
-                fontFamily: 'inherit', color: '#1e293b',
-                boxSizing: 'border-box'
-              }}
-            />
+          {/* Tulos */}
+          {result && (
+            <div style={{ marginTop: '16px' }}>
 
-            {/* Generoi-nappi */}
-            <button
-              onClick={handleGenerate}
-              disabled={loading || !prompt.trim()}
-              style={{
-                width: '100%', marginTop: '10px',
-                padding: '10px', backgroundColor: loading ? '#a78bfa' : '#7c3aed',
-                color: 'white', border: 'none', borderRadius: '8px',
-                fontSize: '1rem', fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {loading ? '⏳ Generoidaan...' : '✨ Generoi sisältö'}
-            </button>
-
-            {error && (
-              <p style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '8px' }}>
-                {error}
-              </p>
-            )}
-
-            {/* Tulokset */}
-            {result && (
-              <div style={{ marginTop: '20px' }}>
-
-                {/* Tekstimuotoinen tulos */}
-                <div style={{
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  padding: '14px',
-                  marginBottom: '16px'
-                }}>
-                  <div style={{ marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600' }}>
-                      OTSIKKO
-                    </span>
-                    <p style={{ margin: '2px 0 0', fontWeight: '700', color: '#e30613' }}>
-                      {result.otsikko}
-                    </p>
-                  </div>
-                  <div style={{ marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600' }}>
-                      TEKSTI
-                    </span>
-                    <p style={{ margin: '2px 0 0', color: '#1e293b', fontSize: '0.9rem' }}>
-                      {result.teksti}
-                    </p>
-                  </div>
-                  <div>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600' }}>
-                      HASHTAGIT
-                    </span>
-                    <p style={{ margin: '2px 0 0', color: '#7c3aed', fontSize: '0.85rem' }}>
-                      {result.hashtagt}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Canvas-esikatselu */}
-                <p style={{
-                  fontSize: '0.8rem', color: '#64748b',
-                  fontWeight: '600', marginBottom: '6px'
-                }}>
-                  ESIKATSELU — infotaulun näkymä:
-                </p>
-                <canvas
-                  ref={canvasRef}
-                  width={800}
-                  height={600}
+              {/* Muokattavat kentät */}
+              <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '14px', marginBottom: '12px' }}>
+                <label style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '4px' }}>
+                  OTSIKKO
+                </label>
+                <input
+                  value={result.otsikko}
+                  onChange={e => setResult(r => ({ ...r, otsikko: e.target.value }))}
                   style={{
-                    width: '100%',
-                    height: 'auto',
-                    border: '2px solid #e2e8f0',
-                    borderRadius: '8px',
-                    display: 'block'
+                    width: '100%', padding: '7px 10px',
+                    border: '1px solid #e2e8f0', borderRadius: '6px',
+                    fontSize: '0.95rem', fontWeight: '700', marginBottom: '10px'
                   }}
                 />
-
-                {/* Toimintopainikkeet */}
-                <div style={{
-                  display: 'flex', gap: '8px',
-                  marginTop: '12px', flexWrap: 'wrap'
-                }}>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(
-                      `${result.otsikko}\n\n${result.teksti}\n\n${result.hashtagt}`
-                    )}
-                    style={{
-                      flex: 1, padding: '8px',
-                      backgroundColor: '#f1f5f9',
-                      color: '#475569', border: '1px solid #e2e8f0',
-                      borderRadius: '6px', fontSize: '0.85rem',
-                      cursor: 'pointer', fontWeight: '500', width: 'auto'
-                    }}
-                  >
-                    📋 Kopioi teksti
-                  </button>
-
-                  <button
-                    onClick={handleUploadToBoard}
-                    disabled={uploading}
-                    style={{
-                      flex: 1, padding: '8px',
-                      backgroundColor: uploading ? '#94a3b8' : '#e30613',
-                      color: 'white', border: 'none',
-                      borderRadius: '6px', fontSize: '0.85rem',
-                      cursor: uploading ? 'not-allowed' : 'pointer',
-                      fontWeight: '600', width: 'auto'
-                    }}
-                  >
-                    {uploading ? '⏳ Ladataan...' : '📤 Lisää infotaululle'}
-                  </button>
-                </div>
-
-                {uploadMsg && (
-                  <p style={{
-                    marginTop: '8px', fontSize: '0.85rem',
-                    color: uploadMsg.startsWith('✅') ? '#16a34a' : '#dc2626'
-                  }}>
-                    {uploadMsg}
-                  </p>
-                )}
-
-                {/* Generoi uudelleen */}
-                <button
-                  onClick={() => { setResult(null); setUploadMsg(''); }}
+                <label style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '4px' }}>
+                  SISÄLTÖ
+                </label>
+                <textarea
+                  value={result.sisalto}
+                  onChange={e => setResult(r => ({ ...r, sisalto: e.target.value }))}
+                  rows={3}
                   style={{
-                    width: '100%', marginTop: '8px', padding: '8px',
-                    backgroundColor: 'transparent',
-                    color: '#7c3aed', border: '1px solid #7c3aed',
-                    borderRadius: '6px', fontSize: '0.85rem',
-                    cursor: 'pointer', fontWeight: '500'
+                    width: '100%', padding: '7px 10px',
+                    border: '1px solid #e2e8f0', borderRadius: '6px',
+                    fontSize: '0.88rem', resize: 'vertical', marginBottom: '10px'
+                  }}
+                />
+                <label style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '4px' }}>
+                  KEHOTUS (valinnainen)
+                </label>
+                <input
+                  value={result.kehotus}
+                  onChange={e => setResult(r => ({ ...r, kehotus: e.target.value }))}
+                  placeholder="Esim: Ilmoittaudu nyt →"
+                  style={{
+                    width: '100%', padding: '7px 10px',
+                    border: '1px solid #e2e8f0', borderRadius: '6px',
+                    fontSize: '0.88rem'
+                  }}
+                />
+              </div>
+
+              {/* Pohjavalinta */}
+              <div style={{ marginBottom: '12px' }}>
+                <p style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: '600', marginBottom: '6px', marginTop: 0 }}>
+                  POHJA
+                </p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {TEMPLATES.map(t => (
+                    <button
+                      key={t.id}
+                      onClick={() => setTemplate(t.id)}
+                      style={{
+                        flex: 1, padding: '8px 4px',
+                        border: `2px solid ${template === t.id ? '#e30613' : '#e2e8f0'}`,
+                        borderRadius: '8px',
+                        background: template === t.id ? '#fef2f2' : '#fff',
+                        fontSize: '0.75rem', fontWeight: '600',
+                        color: template === t.id ? '#e30613' : '#475569',
+                        cursor: 'pointer', width: 'auto'
+                      }}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Toimintopainikkeet */}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  style={{
+                    flex: 2, padding: '11px',
+                    background: uploading ? '#94a3b8' : '#16a34a',
+                    color: '#fff', border: 'none', borderRadius: '8px',
+                    fontSize: '0.88rem', fontWeight: '700', cursor: 'pointer',
+                    width: 'auto'
                   }}
                 >
-                  🔄 Generoi uusi
+                  {uploading ? '⏳ Ladataan...' : '⬆ Lisää infotaululle'}
+                </button>
+                <button
+                  onClick={handleDownloadHTML}
+                  style={{
+                    flex: 1, padding: '11px',
+                    background: '#f1f5f9', color: '#475569',
+                    border: '1px solid #e2e8f0', borderRadius: '8px',
+                    fontSize: '0.88rem', fontWeight: '600', cursor: 'pointer',
+                    width: 'auto'
+                  }}
+                >
+                  ⬇ HTML
                 </button>
               </div>
-            )}
-          </div>
+
+              {uploadMsg && (
+                <p style={{
+                  fontSize: '0.83rem',
+                  color: uploadMsg.includes('✅') ? '#16a34a' : '#dc2626',
+                  marginTop: '8px', marginBottom: 0
+                }}>
+                  {uploadMsg}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
-
-      {/* Taustapeitto kun paneeli auki */}
-      {isOpen && (
-        <div
-          onClick={() => setIsOpen(false)}
-          style={{
-            position: 'fixed', inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            zIndex: 999
-          }}
-        />
-      )}
-    </>
+    </div>
   );
 }

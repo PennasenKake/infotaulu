@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth_routes'); // Kirjautumis ja otp reitit
 const uploadRoutes = require('./routes/upload_routes'); // Tiedoston lataus reitit
 const UploadedFile = require('./models/uploadedFile');
 const heartbeatRoutes = require('./routes/heartbeat_routes');
+const aiRoutes = require('./routes/ai_routes');
 
 const app = express();
 const port = process.env.PORT || 5000; 
@@ -34,6 +35,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes); // kirjautuminen
 app.use('/api/upload', uploadRoutes); // tiedoston lataus
 app.use('/api/heartbeat', heartbeatRoutes);
+app.use('/api/ai', aiRoutes);
 
 
 // Tarkistaa vanhentuneet tiedostot kerran tunnissa
