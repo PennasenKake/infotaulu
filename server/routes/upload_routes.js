@@ -16,11 +16,10 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 }, // 50 Mt
 
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4', 'application/pdf'];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Vain JPG, PNG, MP4 ja PDF-tiedostot ovat sallittuja'), false);
+    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4', 'application/pdf', 'text/html','application/xhtml+xml'];
+    if (!allowedMimeTypes.includes(file.mimetype) && 
+        !allowedExtensions.includes(path.extname(file.originalname).toLowerCase())) {
+      return res.status(400).json({ error: 'Tiedostotyyppi ei ole sallittu' });
     }
   }
 });
