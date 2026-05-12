@@ -1,10 +1,9 @@
 // ─────────────────────────────────────────────────────────────────
-// Paremmat Brändätyt HTML-pohjat SPR Nilsiälle
+// Parannetut Brändätyt HTML-pohjat SPR Nilsiälle
 // ─────────────────────────────────────────────────────────────────
 function generateBrandedHTML({ otsikko, sisalto, kehotus, template = 'modern' }) {
   const templates = {
 
-    // 1. Modern Punainen Kortti (suosituin)
     modern: `<!DOCTYPE html>
 <html lang="fi">
 <head>
@@ -80,14 +79,11 @@ function generateBrandedHTML({ otsikko, sisalto, kehotus, template = 'modern' })
       ${sisalto.replace(/\n/g, '<br><br>')}
       ${kehotus ? `<div class="cta">${kehotus}</div>` : ''}
     </div>
-    <div class="footer">
-      sprinfotaulu.fi • Autamme yhdessä
-    </div>
+    <div class="footer">sprinfotaulu.fi • Autamme yhdessä</div>
   </div>
 </body>
 </html>`,
 
-    // 2. Tumma Eleganssi (tapahtumille)
     dark: `<!DOCTYPE html>
 <html lang="fi">
 <head>
@@ -95,12 +91,7 @@ function generateBrandedHTML({ otsikko, sisalto, kehotus, template = 'modern' })
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #0f172a;
-      width: 1080px; height: 1920px;
-      display: flex; align-items: center; justify-content: center;
-    }
+    body { font-family: 'Inter', sans-serif; background: #0f172a; width: 1080px; height: 1920px; display: flex; align-items: center; justify-content: center; }
     .card {
       background: #1e2937;
       width: 920px;
@@ -114,12 +105,7 @@ function generateBrandedHTML({ otsikko, sisalto, kehotus, template = 'modern' })
       text-align: center;
       color: white;
     }
-    .title {
-      font-size: 72px;
-      font-weight: 800;
-      line-height: 1.05;
-      margin-top: 20px;
-    }
+    .title { font-size: 72px; font-weight: 800; line-height: 1.05; margin-top: 20px; }
     .content {
       padding: 70px 65px;
       font-size: 41px;
@@ -160,7 +146,6 @@ function generateBrandedHTML({ otsikko, sisalto, kehotus, template = 'modern' })
 </body>
 </html>`,
 
-    // 3. Minimalistinen
     minimalistinen: `<!DOCTYPE html>
 <html lang="fi">
 <head>
@@ -219,7 +204,6 @@ function generateBrandedHTML({ otsikko, sisalto, kehotus, template = 'modern' })
 </body>
 </html>`,
 
-    // 4. Klassinen Juliste (erittäin näyttävä)
     juliste: `<!DOCTYPE html>
 <html lang="fi">
 <head>
@@ -276,9 +260,7 @@ function generateBrandedHTML({ otsikko, sisalto, kehotus, template = 'modern' })
     }
     .footer {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       background: #e30613;
       color: white;
       text-align: center;
