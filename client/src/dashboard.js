@@ -18,9 +18,8 @@ import DeviceStatus from './components/DeviceStatus';
 import StorageBar from './components/StorageBar';
 import FileUploadForm from './components/FileUploadForm';
 import SortableRow from './components/SortableRow';
-//import AiAssistant from './components/AIAssistant';
 
-import AiAssistant from './components/aiAssistant/index.js';
+import AiAssistant from './components/aiAssistant';
 
 
 function Dashboard({ onLogout, token }) {
