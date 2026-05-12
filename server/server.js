@@ -20,6 +20,7 @@ const mongoose = require('mongoose');
 const allowedOrigins = [
   'https://www.sprinfotaulu.fi',
   'https://sprinfotaulu.fi',
+  'http://localhost:3000',
   'https://infotaulu.up.railway.app',   
   'https://infotaulu-backend.up.railway.app',
 ];
