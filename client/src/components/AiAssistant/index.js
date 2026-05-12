@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { generateBrandedHTML } from './utils/generateHTML';
 
-export default function AIAssistant({ token, apiUrl, onUploadSuccess }) {
+export default function AiAssistant({ token, apiUrl, onUploadSuccess }) {
   const [prompt, setPrompt] = useState('');
   const [result, setResult] = useState(null);
   const [template, setTemplate] = useState('perus');
@@ -214,4 +214,3 @@ return (
   );
 }
 
-export default AiAssistant
