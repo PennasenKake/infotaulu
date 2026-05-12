@@ -214,3 +214,4 @@ return (
   );
 }
 
+export default AiAssistant;

@@ -1,4 +1,4 @@
-// client/src/components/AIAssistant/utils/generateHTML.js
+// client/src/components/aiAssistant/utils/generateHTML.js
 import perusTemplate from '../templates/perus';
 import tummaTemplate from '../templates/tumma';
 import minimalistinenTemplate from '../templates/minimalistinen';
@@ -9,7 +9,6 @@ export function generateBrandedHTML({ otsikko, sisalto, kehotus, template = 'per
     tumma: tummaTemplate,
     minimalistinen: minimalistinenTemplate,
   };
-
   const selectedTemplate = templates[template] || templates.perus;
   return selectedTemplate({ otsikko, sisalto, kehotus });
 }
