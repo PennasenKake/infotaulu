@@ -107,83 +107,77 @@ export default function AIAssistant({ token, apiUrl, onUploadSuccess }) {
     "Ystäväkerho kokoontuu torstaina"
   ];
 
-  return (
-    <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' }}>
+return (
+    <div className="ai-assistant">
       <button
         onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%', textAlign: 'left', padding: '16px 20px',
-          background: open ? '#fef2f2' : '#f8fafc',
-          border: 'none', cursor: 'pointer',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-        }}
+        className="ai-toggle-btn"
       >
-        <span style={{ fontWeight: '700', fontSize: '1.05rem' }}>✨ AI-sisältöapuri</span>
+        <span>✨ AI-sisältöapuri</span>
         <span>{open ? '▲ Sulje' : '▼ Avaa'}</span>
       </button>
 
       {open && (
-        <div style={{ padding: '20px', background: '#fff' }}>
-          <label style={{ fontSize: '0.85rem', color: '#475569', fontWeight: '600', display: 'block', marginBottom: '8px' }}>
-            Kuvaile sisältö suomeksi:
-          </label>
+        <div className="ai-panel">
+          <label className="ai-label">Kuvaile sisältö suomeksi:</label>
 
           <textarea
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
             placeholder="Esim: Ensiapukurssi järjestetään 15.10. Nilsiän palotalolla klo 18-21..."
             rows={4}
-            style={{ width: '100%', padding: '12px', border: '2px solid #e2e8f0', borderRadius: '8px', fontSize: '0.95rem', resize: 'vertical' }}
+            className="ai-textarea"
           />
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '10px 0 14px' }}>
+          <div className="ai-examples">
             {ESIMERKIT.map((ex, i) => (
-              <button key={i} onClick={() => setPrompt(ex)} style={{
-                padding: '5px 12px', fontSize: '0.78rem', background: '#f1f5f9',
-                border: '1px solid #e2e8f0', borderRadius: '20px', cursor: 'pointer'
-              }}>
+              <button key={i} onClick={() => setPrompt(ex)} className="ai-example-btn">
                 {ex}
               </button>
             ))}
           </div>
 
-          <button onClick={handleGenerate} disabled={loading || !prompt.trim()} style={{
-            width: '100%', padding: '12px', marginBottom: '12px',
-            background: loading || !prompt.trim() ? '#94a3b8' : '#e30613',
-            color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700'
-          }}>
+          <button 
+            onClick={handleGenerate}
+            disabled={loading || !prompt.trim()}
+            className="ai-generate-btn"
+          >
             {loading ? '⏳ Generoidaan...' : '✨ Luo sisältö'}
           </button>
 
-          {error && <p style={{ color: '#dc2626' }}>{error}</p>}
+          {error && <p className="ai-error">{error}</p>}
 
           {result && (
-            <div style={{ marginTop: '16px' }}>
-              <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '10px', marginBottom: '12px' }}>
+            <div className="ai-result">
+              <div className="ai-result-fields">
                 <label>Otsikko</label>
-                <input value={result.otsikko} onChange={e => setResult(r => ({...r, otsikko: e.target.value}))} style={{width:'100%', marginBottom:'10px'}} />
+                <input 
+                  value={result.otsikko} 
+                  onChange={e => setResult(r => ({...r, otsikko: e.target.value}))} 
+                />
 
                 <label>Sisältö</label>
-                <textarea value={result.sisalto} onChange={e => setResult(r => ({...r, sisalto: e.target.value}))} rows={4} style={{width:'100%', marginBottom:'10px'}} />
+                <textarea 
+                  value={result.sisalto} 
+                  onChange={e => setResult(r => ({...r, sisalto: e.target.value}))} 
+                  rows={5}
+                />
 
                 <label>Kehotus (valinnainen)</label>
-                <input value={result.kehotus} onChange={e => setResult(r => ({...r, kehotus: e.target.value}))} style={{width:'100%'}} />
+                <input 
+                  value={result.kehotus} 
+                  onChange={e => setResult(r => ({...r, kehotus: e.target.value}))} 
+                />
               </div>
 
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{fontWeight:'600', marginBottom:'6px'}}>Valitse pohja</p>
-                <div style={{ display: 'flex', gap: '8px' }}>
+              <div className="ai-template-selector">
+                <p>Valitse pohja</p>
+                <div className="ai-templates">
                   {TEMPLATES.map(t => (
                     <button
                       key={t.id}
                       onClick={() => setTemplate(t.id)}
-                      style={{
-                        flex: 1, padding: '10px',
-                        border: `2px solid ${template === t.id ? '#e30613' : '#e2e8f0'}`,
-                        borderRadius: '8px',
-                        background: template === t.id ? '#fef2f2' : '#fff',
-                        fontWeight: '600'
-                      }}
+                      className={`ai-template-btn ${template === t.id ? 'active' : ''}`}
                     >
                       {t.label}
                     </button>
@@ -191,16 +185,27 @@ export default function AIAssistant({ token, apiUrl, onUploadSuccess }) {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={handleUpload} disabled={uploading} style={{ flex: 2, padding: '12px', background: '#16a34a', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700' }}>
+              <div className="ai-actions">
+                <button 
+                  onClick={handleUpload} 
+                  disabled={uploading} 
+                  className="ai-upload-btn"
+                >
                   {uploading ? 'Ladataan...' : '⬆ Lisää infotaululle'}
                 </button>
-                <button onClick={handleDownloadHTML} style={{ flex: 1, padding: '12px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '8px', fontWeight: '600' }}>
-                  ⬇ HTML
+                <button 
+                  onClick={handleDownloadHTML} 
+                  className="ai-download-btn"
+                >
+                  ⬇ Lataa HTML
                 </button>
               </div>
 
-              {uploadMsg && <p style={{ marginTop: '10px', color: uploadMsg.includes('✅') ? 'green' : 'red' }}>{uploadMsg}</p>}
+              {uploadMsg && (
+                <p className={`ai-upload-msg ${uploadMsg.includes('✅') ? 'success' : 'error'}`}>
+                  {uploadMsg}
+                </p>
+              )}
             </div>
           )}
         </div>
