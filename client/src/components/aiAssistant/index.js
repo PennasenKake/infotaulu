@@ -1,6 +1,7 @@
 // client/src/components/AIAssistant/index.js
 import React, { useState } from 'react';
 import { generateBrandedHTML } from './utils/generateHTML';
+import './aiAssistant.css';
 
 export default function AiAssistant({ token, apiUrl, onUploadSuccess }) {
   const [prompt, setPrompt] = useState('');
