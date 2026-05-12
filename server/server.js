@@ -26,7 +26,6 @@ const allowedOrigins = [
 ];
 
 
-app.options('*', cors()); // preflight
 
 app.use(cors({
   origin: function (origin, callback) {
