@@ -213,3 +213,5 @@ return (
     </div>
   );
 }
+
+export default AiAssistant
