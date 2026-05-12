@@ -19,7 +19,7 @@ import StorageBar from './components/StorageBar';
 import FileUploadForm from './components/FileUploadForm';
 import SortableRow from './components/SortableRow';
 
-import AiAssistant from './components/aiAssistant';
+import AiAssistant from './components/AiAssistant';
 
 
 function Dashboard({ onLogout, token }) {
