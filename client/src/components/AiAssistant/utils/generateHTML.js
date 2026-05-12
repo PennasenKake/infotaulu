@@ -1,10 +1,13 @@
 // client/src/components/AIAssistant/utils/generateHTML.js
+import perusTemplate from '../templates/perus';
+import tummaTemplate from '../templates/tumma';
+import minimalistinenTemplate from '../templates/minimalistinen';
 
 export function generateBrandedHTML({ otsikko, sisalto, kehotus, template = 'perus' }) {
   const templates = {
-    perus: require('../templates/perus').default,
-    tumma: require('../templates/tumma').default,
-    minimalistinen: require('../templates/minimalistinen').default,
+    perus: perusTemplate,
+    tumma: tummaTemplate,
+    minimalistinen: minimalistinenTemplate,
   };
 
   const selectedTemplate = templates[template] || templates.perus;

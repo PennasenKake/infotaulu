@@ -18,7 +18,7 @@ import DeviceStatus from './components/DeviceStatus';
 import StorageBar from './components/StorageBar';
 import FileUploadForm from './components/FileUploadForm';
 import SortableRow from './components/SortableRow';
-import AiAssistant from './components/AIAssistant/index';
+import AiAssistant from './components/AIAssistant/ai_index';
 
 function Dashboard({ onLogout, token }) {
   const email = localStorage.getItem('authenticatedEmail') || 'Tuntematon käyttäjä';
