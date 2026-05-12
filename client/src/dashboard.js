@@ -19,7 +19,7 @@ import StorageBar from './components/StorageBar';
 import FileUploadForm from './components/FileUploadForm';
 import SortableRow from './components/SortableRow';
 
-//import AiAssistant from './components/aiAssistant';
+import AiAssistant from './components/aiAssistant';
 
 
 function Dashboard({ onLogout, token }) {
@@ -315,7 +315,7 @@ function Dashboard({ onLogout, token }) {
             </h2>
 
             <br />
-            {/*    <AiAssistant token={token} apiUrl={API_URL}  onUploadSuccess={fetchFiles} /> */}
+              <AiAssistant token={token} apiUrl={API_URL}  onUploadSuccess={fetchFiles} />
             <br />
 
             <FileUploadForm
