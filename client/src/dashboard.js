@@ -315,7 +315,7 @@ function Dashboard({ onLogout, token }) {
             </h2>
 
             <br />
-              <AiAssistant token={token} apiUrl={API_URL}  onUploadSuccess={fetchFiles} />
+            {/*    <AiAssistant token={token} apiUrl={API_URL}  onUploadSuccess={fetchFiles} /> */}
             <br />
 
             <FileUploadForm
