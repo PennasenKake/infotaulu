@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { generateBrandedHTML } from './utils/generateHTML';
 import './aiAssistant.css';
+import html2canvas from 'html2canvas';
+
 
 export default function AiAssistant({ token, apiUrl, onUploadSuccess }) {
   const [prompt, setPrompt] = useState('');
@@ -240,7 +242,7 @@ return (
                   ))}
                 </div>
               </div>
-              
+
             <div className="ai-actions">
             <button onClick={handleUpload} disabled={uploading}
                 style={{ flex: 2, padding: '11px',
