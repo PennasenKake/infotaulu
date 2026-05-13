@@ -108,6 +108,61 @@ export default function AiAssistant({ token, apiUrl, onUploadSuccess }) {
     "Ystäväkerho kokoontuu torstaina"
   ];
 
+  const handleDownloadImage = async () => {
+  if (!result) return;
+
+  const html = generateBrandedHTML({ ...result, template });
+
+  // Luodaan piilotettu container johon HTML renderöidään
+  const container = document.createElement('div');
+  container.style.cssText = [
+    'position:fixed',
+    'left:-9999px',
+    'top:0',
+    'width:1080px',
+    'height:1920px',
+    'overflow:hidden',
+    'background:#000',
+  ].join(';');
+
+  // Kirjoitetaan HTML iframe:n sijaan suoraan shadowRoot-trikkiä käyttäen
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'width:1080px;height:1920px;border:none';
+  container.appendChild(iframe);
+  document.body.appendChild(container);
+
+  // Odotetaan että iframe latautuu
+  await new Promise((resolve) => {
+    iframe.onload = resolve;
+    iframe.srcdoc = html;
+  });
+
+  // Pieni viive fonttien latautumiselle
+  await new Promise(r => setTimeout(r, 800));
+
+  try {
+    const canvas = await html2canvas(iframe.contentDocument.body, {
+      width:   1080,
+      height:  1920,
+      scale:   1,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null,
+    });
+
+    const a = document.createElement('a');
+    a.href     = canvas.toDataURL('image/png');
+    a.download = `spr_nilsia_${Date.now()}.png`;
+    a.click();
+  } catch (err) {
+    console.error('html2canvas virhe:', err);
+    // Fallback: lataa HTML jos kuvakaappaus epäonnistuu
+    handleDownloadHTML();
+  } finally {
+    document.body.removeChild(container);
+  }
+};
+  
 return (
     <div className="ai-assistant">
       <button
@@ -185,22 +240,37 @@ return (
                   ))}
                 </div>
               </div>
+              
+            <div className="ai-actions">
+            <button onClick={handleUpload} disabled={uploading}
+                style={{ flex: 2, padding: '11px',
+                background: uploading ? '#94a3b8' : '#16a34a',
+                color: '#fff', border: 'none', borderRadius: '8px',
+                fontSize: '0.88rem', fontWeight: '700',
+                cursor: uploading ? 'not-allowed' : 'pointer', width: 'auto' }}>
+                {uploading ? '⏳ Ladataan...' : '⬆ Lisää infotaululle'}
+            </button>
 
-              <div className="ai-actions">
-                <button 
-                  onClick={handleUpload} 
-                  disabled={uploading} 
-                  className="ai-upload-btn"
-                >
-                  {uploading ? 'Ladataan...' : '⬆ Lisää infotaululle'}
-                </button>
-                <button 
-                  onClick={handleDownloadHTML} 
-                  className="ai-download-btn"
-                >
-                  ⬇ Lataa HTML
-                </button>
-              </div>
+            {/* ✅ Lataa PNG */}
+            <button onClick={handleDownloadImage}
+                style={{ flex: 1, padding: '11px',
+                background: '#f1f5f9', color: '#475569',
+                border: '1px solid #e2e8f0', borderRadius: '8px',
+                fontSize: '0.85rem', fontWeight: '600',
+                cursor: 'pointer', width: 'auto' }}
+                title="Lataa 1080×1920 px PNG-kuvana">
+                🖼 PNG
+            </button>
+
+            {/* Uusi generointi */}
+            <button onClick={() => { setResult(null); setUploadMsg(''); setError(''); }}
+                title="Uusi generointi"
+                style={{ padding: '11px 14px', background: '#fff', color: '#94a3b8',
+                border: '1px solid #e2e8f0', borderRadius: '8px',
+                fontSize: '0.88rem', cursor: 'pointer', width: 'auto' }}>
+                ↺
+            </button>
+            </div>
 
               {uploadMsg && (
                 <p className={`ai-upload-msg ${uploadMsg.includes('✅') ? 'success' : 'error'}`}>
