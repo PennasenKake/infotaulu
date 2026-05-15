@@ -9,14 +9,18 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const generateOTP = async (req, res) => {
   const { email } = req.body;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const aika = new Date().toISOString();
 
   // Validointi
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    console.log(`[OTP] HYLÄTTY — virheellinen sähköposti | IP: ${ip} | ${aika}`);
     return res.status(400).json({ error: 'Kelvollinen sähköposti vaaditaan' });
   }
 
   // Tarkistetaan, onko sähköpostiosoite sallittu
   if (!isEmailWhitelisted(email)) {
+    console.log(`[OTP] ESTETTY — ei whitelistalla: ${email} | IP: ${ip} | ${aika}`);
     return res.status(403).json({ error: 'Sähköpostiosoitteesi ei ole sallittu' });
   }
 
@@ -51,9 +55,10 @@ const generateOTP = async (req, res) => {
         </p>
       `,
     });
-
+    console.log(`[OTP] LÄHETETTY — ${email} | IP: ${ip} | ${aika}`);
     return res.json({ message: 'Kertakäyttökoodi lähetetty onnistuneesti' });
   } catch (err) {
+    console.error(`[OTP] VIRHE — ${email} | IP: ${ip} | ${aika} | ${err.message}`);
     console.error('generate-otp error:', err);
     return res.status(500).json({ error: 'OTP:n lähetys epäonnistui' });
   }
@@ -65,6 +70,8 @@ const verifyOTP = async (req, res) => {
   // Normalisointi
   email = email?.trim().toLowerCase();
   otp = otp?.trim();
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const aika = new Date().toISOString();
 
   if (!email || !otp) {
     return res.status(400).json({ error: 'Puuttuvat tiedot' });
@@ -73,7 +80,10 @@ const verifyOTP = async (req, res) => {
   try {
     // Etsitään täsmäävä otp tietue
     const record = await Otp.findOne({ email, otp });
+
     if (!record) {
+      // Tärkeä: kirjaa epäonnistuneet kirjautumisyritykset
+      console.log(`[AUTH] EPÄONNISTUI — väärä/vanhentunut koodi: ${email} | IP: ${ip} | ${aika}`);
       return res.status(400).json({ error: 'Virheellinen tai vanhentunut koodi' });
     }
 
@@ -81,9 +91,10 @@ const verifyOTP = async (req, res) => {
     await Otp.deleteOne({ _id: record._id });
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
-
+    console.log(`[AUTH] ONNISTUI — kirjautuminen: ${email} | IP: ${ip} | ${aika}`);
     return res.json({ message: 'Koodi hyväksytty', success: true, token: token });
   } catch (err) {
+    console.error(`[AUTH] VIRHE — ${email} | IP: ${ip} | ${aika} | ${err.message}`);
     console.error('verify-otp error:', err);
     return res.status(500).json({ error: 'Palvelinvirhe' });
   }

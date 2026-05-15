@@ -6,6 +6,9 @@ const mongoose = require('mongoose');
 
 
 const uploadFile = async (req, res) => {
+  
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
   try {
 
     // Multer on jo tarkistanut tiedoston olemassaolon → tämä on viimeinen tarkistus
@@ -49,6 +52,8 @@ const uploadFile = async (req, res) => {
 
       // Onnistunut tallennus GridFS:ään → tallennetaan metatiedot
       .on('finish', async () => {
+        console.log(`[UPLOAD] Ladattu: ${req.file.originalname} | Käyttäjä: ${uploadedBy} | IP: ${ip} | ${new Date().toISOString()}`);
+
         try {
           const newFile = new UploadedFile({
             filename: uploadStream.id.toString(),   // GridFS:n generoima ObjectId stringinä
@@ -111,6 +116,7 @@ const listFiles = async (req, res) => {
 
 
 const deleteFile = async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   try {
     const file = await UploadedFile.findById(req.params.id);
     if (!file) {
@@ -127,6 +133,7 @@ const deleteFile = async (req, res) => {
     await bucket.delete(new mongoose.Types.ObjectId(file.filename));
 
     await file.deleteOne();
+    console.log(`[DELETE] Poistettu: ${file.originalName} | IP: ${ip} | ${new Date().toISOString()}`);
 
     res.json({ message: 'File deleted successfully' });
 
