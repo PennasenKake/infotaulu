@@ -12,6 +12,9 @@ const heartbeatRoutes = require('./routes/heartbeat_routes');
 const aiRoutes = require('./routes/ai_routes');
 
 const app = express();
+
+app.set('trust proxy', 1);
+
 const port = process.env.PORT || 5000; 
 
 const {getGridFSBucket} = require('./config/db');
