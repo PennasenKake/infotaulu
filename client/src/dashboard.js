@@ -285,7 +285,7 @@ function Dashboard({ onLogout, token }) {
                 <strong>Poista tiedosto</strong> pysyvästi painamalla{' '}
                 <strong>"Poista"</strong>-nappia ja vahvistamalla poistaminen.
               </li>
-
+              <br />
               {/* AI-AVUSTAJAN OHJEET */}
               <li>
                 <strong>✨ AI-sisältöapuri</strong> — luo valmis infotauluilmoitus
@@ -318,6 +318,9 @@ function Dashboard({ onLogout, token }) {
                   </li>
                 </ul>
               </li>
+
+              <br />
+
 
               <li>
                 <strong>Offline-tila:</strong> Jos infotaulu näkyy punaisena,
