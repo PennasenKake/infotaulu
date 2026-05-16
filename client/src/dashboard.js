@@ -285,6 +285,40 @@ function Dashboard({ onLogout, token }) {
                 <strong>Poista tiedosto</strong> pysyvästi painamalla{' '}
                 <strong>"Poista"</strong>-nappia ja vahvistamalla poistaminen.
               </li>
+
+              {/* AI-AVUSTAJAN OHJEET */}
+              <li>
+                <strong>✨ AI-sisältöapuri</strong> — luo valmis infotauluilmoitus
+                tekoälyn avulla ilman kuvankäsittelyohjelmaa:
+                <ul style={{ marginTop: '6px' }}>
+                  <li>
+                    Avaa apuri painamalla <strong>"✨ AI-sisältöapuri"</strong> -nappia
+                    hallintapaneelin yläosassa.
+                  </li>
+                  <li>
+                    Kuvaile haluamasi sisältö suomeksi tai valitse valmis
+                    esimerkkipohja.
+                  </li>
+                  <li>
+                    Paina <strong>"Luo sisältö"</strong> — tekoäly luo otsikon,
+                    tekstin ja kehotteen automaattisesti.
+                  </li>
+                  <li>
+                    Muokkaa tekstikenttiä tarvittaessa ja valitse visuaalinen teema
+                    (punainen, tumma tai minimalistinen).
+                  </li>
+                  <li>
+                    Paina <strong>"Lisää infotaululle"</strong> lähettääksesi sisällön
+                    suoraan näytölle, tai lataa se <strong>PNG-kuvana</strong> omalle
+                    koneellesi.
+                  </li>
+                  <li>
+                    Tarkista aina tekoälyn luoma sisältö ennen julkaisua —
+                    päivämäärät ja paikannimet voivat vaatia korjausta.
+                  </li>
+                </ul>
+              </li>
+
               <li>
                 <strong>Offline-tila:</strong> Jos infotaulu näkyy punaisena,
                 laite ei ole yhteydessä internetiin tai se ei ole päällä.
