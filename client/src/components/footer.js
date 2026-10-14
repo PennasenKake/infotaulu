@@ -12,7 +12,9 @@ function Footer() {
         <a href="https://oma.punainenristi.fi/">OMA</a>
         <a href="https://paivystykset.punainenristi.fi/">Päivystykset</a>
         <a href="https://ossi.punainenristi.fi/login">OSSI</a>
-        <a href="https://materiaalipankki.punainenristi.fi/">Materiaalipankki</a>
+        <a href="https://materiaalipankki.punainenristi.fi/">
+          Materiaalipankki
+        </a>
         <a href="https://www.facebook.com/sprnilsia">Facebook</a>
         <a href="https://www.instagram.com/punainen_risti_nilsian_osasto/">
           Instagram

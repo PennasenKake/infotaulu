@@ -1,15 +1,15 @@
-import './App.css';
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import "./App.css";
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import Login from './login';
-import Dashboard from './dashboard';
-import { useAuth } from './hooks/useAuth';
+import Login from "./login";
+import Dashboard from "./dashboard";
+import { useAuth } from "./hooks/useAuth";
 
 function App() {
-// const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
-  const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
-  const auth = useAuth(API_URL);     
+  // const API_URL = process.env.REACT_APP_API_URL || 'https://infotaulu-backend.up.railway.app';
+  const API_URL = process.env.REACT_APP_API_URL || "https://sprinfotaulu.fi";
+  const auth = useAuth(API_URL);
 
   return (
     <Routes>
@@ -19,7 +19,7 @@ function App() {
           auth.isAuthenticated ? (
             <Navigate to="/dashboard" replace />
           ) : (
-            <Login {...auth} />       
+            <Login {...auth} />
           )
         }
       />

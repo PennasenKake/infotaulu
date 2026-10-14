@@ -1,38 +1,38 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Heartbeat = require('../models/heartbeat');
-const { authenticateToken } = require('../middleware/auth');
+const Heartbeat = require("../models/heartbeat");
+const { authenticateToken } = require("../middleware/auth");
 
 // RPI lähettää tähän — ei vaadi JWT-tokenia
-router.post('/ping', async (req, res) => {
+router.post("/ping", async (req, res) => {
   try {
-    const { deviceId = 'rpi-infotaulu', syncedFiles = 0 } = req.body;
+    const { deviceId = "rpi-infotaulu", syncedFiles = 0 } = req.body;
 
     await Heartbeat.findOneAndUpdate(
       { deviceId },
       { lastSeen: new Date(), syncedFiles },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
 
-    res.json({ status: 'ok', received: new Date() });
+    res.json({ status: "ok", received: new Date() });
   } catch (err) {
-    console.error('Heartbeat error:', err);
-    res.status(500).json({ error: 'Heartbeat failed' });
+    console.error("Heartbeat error:", err);
+    res.status(500).json({ error: "Heartbeat failed" });
   }
 });
 
 // Frontend hakee tästä — vaatii JWT
-router.get('/status', authenticateToken, async (req, res) => {
+router.get("/status", authenticateToken, async (req, res) => {
   try {
-    const heartbeat = await Heartbeat.findOne({ 
-      deviceId: 'rpi-infotaulu' 
+    const heartbeat = await Heartbeat.findOne({
+      deviceId: "rpi-infotaulu",
     });
 
     if (!heartbeat) {
-      return res.json({ 
-        online: false, 
+      return res.json({
+        online: false,
         lastSeen: null,
-        syncedFiles: 0
+        syncedFiles: 0,
       });
     }
 
@@ -43,10 +43,10 @@ router.get('/status', authenticateToken, async (req, res) => {
     res.json({
       online,
       lastSeen: heartbeat.lastSeen,
-      syncedFiles: heartbeat.syncedFiles
+      syncedFiles: heartbeat.syncedFiles,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Status check failed' });
+    res.status(500).json({ error: "Status check failed" });
   }
 });
 

@@ -41,7 +41,7 @@
 .ai-toggle-btn span:last-child {
   font-size: 0.8rem;
   font-weight: 600;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255, 255, 255, 0.55);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -76,7 +76,9 @@
   min-height: 110px;
   color: #1e293b;
   background: #f8fafc;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
   line-height: 1.5;
 }
 
@@ -127,7 +129,9 @@
   font-family: inherit;
   margin-bottom: 18px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    transform 0.1s;
   letter-spacing: 0.02em;
 }
 
@@ -196,7 +200,9 @@
   font-family: inherit;
   color: #1e293b;
   background: #f8fafc;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
   line-height: 1.5;
 }
 
@@ -251,7 +257,7 @@
   border-color: #e30613;
   background: #fff1f2;
   color: #e30613;
-  box-shadow: 0 0 0 3px rgba(227,6,19,0.08);
+  box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.08);
 }
 
 /* ── Toimintonapit ── */
@@ -272,7 +278,9 @@
   font-weight: 700;
   font-size: 0.97rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    transform 0.1s;
   letter-spacing: 0.01em;
 }
 

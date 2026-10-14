@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const { GridFSBucket } = require('mongodb');
+const mongoose = require("mongoose");
+const { GridFSBucket } = require("mongodb");
 
-// 
+//
 let gridFSBucket;
 
 const connectDB = async () => {
@@ -15,13 +15,12 @@ const connectDB = async () => {
     //      - uploads.files
     //      - uploads.chunks
     gridFSBucket = new GridFSBucket(conn.connection.db, {
-      bucketName: 'uploads',
+      bucketName: "uploads",
     });
 
-    console.log('GridFSBucket initialized');
-
+    console.log("GridFSBucket initialized");
   } catch (err) {
-    console.error('MongoDB connection FAILED:', err);
+    console.error("MongoDB connection FAILED:", err);
     process.exit(1);
   }
 };
@@ -29,7 +28,7 @@ const connectDB = async () => {
 // Palauttaa GridFSBucket-olion
 const getGridFSBucket = () => {
   if (!gridFSBucket) {
-    throw new Error('GridFSBucket not initialized');
+    throw new Error("GridFSBucket not initialized");
   }
   return gridFSBucket;
 };

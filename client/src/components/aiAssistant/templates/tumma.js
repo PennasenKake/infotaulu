@@ -239,8 +239,8 @@ export default function tummaTemplate({ otsikko, sisalto, kehotus }) {
   </div>
 
   <div class="body">
-    <div class="content-text">${sisalto.replace(/\n/g, '<br><br>')}</div>
-    ${kehotus ? `<div class="cta-wrap"><div class="cta">${kehotus}</div></div>` : ''}
+    <div class="content-text">${sisalto.replace(/\n/g, "<br><br>")}</div>
+    ${kehotus ? `<div class="cta-wrap"><div class="cta">${kehotus}</div></div>` : ""}
   </div>
 
   <div class="footer">

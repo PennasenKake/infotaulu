@@ -1,28 +1,24 @@
-const { getGridFSBucket } = require('../config/db');
-const UploadedFile = require('../models/uploadedFile');
-const { Readable } = require('stream');
-const mongoose = require('mongoose');
-
-
+const { getGridFSBucket } = require("../config/db");
+const UploadedFile = require("../models/uploadedFile");
+const { Readable } = require("stream");
+const mongoose = require("mongoose");
 
 const uploadFile = async (req, res) => {
-  
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
   try {
-
     // Multer on jo tarkistanut tiedoston olemassaolon → tämä on viimeinen tarkistus
     if (!req.file) {
-      return res.status(400).json({ error: 'Tiedostoa ei ladattu' });
+      return res.status(400).json({ error: "Tiedostoa ei ladattu" });
     }
 
     const { originalname, mimetype, buffer } = req.file;
-    const uploadedBy = req.body.uploadedBy || 'anonymous';
+    const uploadedBy = req.body.uploadedBy || "anonymous";
 
     const existing = await UploadedFile.findOne({ originalName: originalname });
     if (existing) {
-      return res.status(409).json({ 
-        error: `Tiedosto "${originalname}" on jo olemassa. Poista vanha ensin tai lataa eri nimellä.` 
+      return res.status(409).json({
+        error: `Tiedosto "${originalname}" on jo olemassa. Poista vanha ensin tai lataa eri nimellä.`,
       });
     }
 
@@ -38,30 +34,35 @@ const uploadFile = async (req, res) => {
     const readableStream = Readable.from(req.file.buffer);
 
     // Event-pohjainen pipe + asynkroninen finish → race condition -riski
-    readableStream.pipe(uploadStream)
+    readableStream
+      .pipe(uploadStream)
 
       // Virhe haarassa → stream error (esim. kirjoitusvirhe MongoDB:hen)
-      .on('error', (err) => {
-        console.error('GridFS stream virhe:', err.message, err.stack);
+      .on("error", (err) => {
+        console.error("GridFS stream virhe:", err.message, err.stack);
 
         // Turvatarkistus: headersSent estää "Cannot set headers after they are sent" -kaatumisen
         if (!res.headersSent) {
-          res.status(500).json({ error: 'Tiedoston tallennus GridFS:ään epäonnistui' });
+          res
+            .status(500)
+            .json({ error: "Tiedoston tallennus GridFS:ään epäonnistui" });
         }
       })
 
       // Onnistunut tallennus GridFS:ään → tallennetaan metatiedot
-      .on('finish', async () => {
-        console.log(`[UPLOAD] Ladattu: ${req.file.originalname} | Käyttäjä: ${uploadedBy} | IP: ${ip} | ${new Date().toISOString()}`);
+      .on("finish", async () => {
+        console.log(
+          `[UPLOAD] Ladattu: ${req.file.originalname} | Käyttäjä: ${uploadedBy} | IP: ${ip} | ${new Date().toISOString()}`,
+        );
 
         try {
           const newFile = new UploadedFile({
-            filename: uploadStream.id.toString(),   // GridFS:n generoima ObjectId stringinä
+            filename: uploadStream.id.toString(), // GridFS:n generoima ObjectId stringinä
             originalName: req.file.originalname,
             mimeType: req.file.mimetype,
             size: req.file.size,
             uploadedBy,
-            expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null
+            expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null,
             // uploadedAt: automaattisesti schema.default(Date.now)
           });
 
@@ -70,57 +71,58 @@ const uploadFile = async (req, res) => {
           // Lopullinen vastaus vain jos mitään ei ole vielä lähetetty
           if (!res.headersSent) {
             res.status(201).json({
-              message: 'Tiedosto ladattu onnistuneesti',
+              message: "Tiedosto ladattu onnistuneesti",
               file: {
                 id: newFile._id.toString(),
-                gridfsId: uploadStream.id.toString(),   
+                gridfsId: uploadStream.id.toString(),
                 filename: newFile.filename,
                 originalName: newFile.originalName,
                 mimeType: newFile.mimeType,
                 size: newFile.size,
                 uploadedBy: newFile.uploadedBy,
                 uploadedAt: newFile.uploadedAt,
-              }
+              },
             });
           }
         } catch (dbError) {
-          console.error('Metatietojen tallennusvirhe:', dbError);
+          console.error("Metatietojen tallennusvirhe:", dbError);
 
           if (!res.headersSent) {
-            res.status(500).json({ error: 'Metatietojen tallennus epäonnistui' });
+            res
+              .status(500)
+              .json({ error: "Metatietojen tallennus epäonnistui" });
           }
         }
       });
-
   } catch (error) {
     // Catch kattaa mm. getGridFSBucket-virheet, yllättävät poikkeukset
-    console.error('uploadFile yleisvirhe:', error);
+    console.error("uploadFile yleisvirhe:", error);
 
     if (!res.headersSent) {
-      res.status(500).json({ error: 'Palvelinvirhe tiedoston käsittelyssä' });
+      res.status(500).json({ error: "Palvelinvirhe tiedoston käsittelyssä" });
     }
   }
 };
 
 const listFiles = async (req, res) => {
   try {
-    const files = await UploadedFile
-      .find()
+    const files = await UploadedFile.find()
       .sort({ sortOrder: 1, uploadedAt: -1 }) // sortOrder ensin, sitten uploadedAt
-      .select('filename originalName mimeType size uploadedBy uploadedAt displaySeconds isActive expiresAt sortOrder');
+      .select(
+        "filename originalName mimeType size uploadedBy uploadedAt displaySeconds isActive expiresAt sortOrder",
+      );
     res.json(files);
   } catch (err) {
-    res.status(500).json({ error: 'Tiedostojen haku epäonnistui' });
+    res.status(500).json({ error: "Tiedostojen haku epäonnistui" });
   }
 };
 
-
 const deleteFile = async (req, res) => {
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   try {
     const file = await UploadedFile.findById(req.params.id);
     if (!file) {
-      return res.status(404).json({ error: 'File not found' });
+      return res.status(404).json({ error: "File not found" });
     }
 
     const bucket = getGridFSBucket();
@@ -133,15 +135,15 @@ const deleteFile = async (req, res) => {
     await bucket.delete(new mongoose.Types.ObjectId(file.filename));
 
     await file.deleteOne();
-    console.log(`[DELETE] Poistettu: ${file.originalName} | IP: ${ip} | ${new Date().toISOString()}`);
+    console.log(
+      `[DELETE] Poistettu: ${file.originalName} | IP: ${ip} | ${new Date().toISOString()}`,
+    );
 
-    res.json({ message: 'File deleted successfully' });
-
+    res.json({ message: "File deleted successfully" });
   } catch (error) {
-    console.error('Delete error:', error);
+    console.error("Delete error:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
 module.exports = { uploadFile, listFiles, deleteFile };
-

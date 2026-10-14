@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -6,29 +6,29 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+} from "@dnd-kit/sortable";
 
-import DeviceStatus from './components/DeviceStatus';
-import StorageBar from './components/StorageBar';
-import FileUploadForm from './components/FileUploadForm';
-import SortableRow from './components/SortableRow';
+import DeviceStatus from "./components/DeviceStatus";
+import StorageBar from "./components/StorageBar";
+import FileUploadForm from "./components/FileUploadForm";
+import SortableRow from "./components/SortableRow";
 
-import AiAssistant from './components/aiAssistant';
-
+import AiAssistant from "./components/aiAssistant";
 
 function Dashboard({ onLogout, token }) {
-  const email = localStorage.getItem('authenticatedEmail') || 'Tuntematon käyttäjä';
-  const API_URL = process.env.REACT_APP_API_URL || 'https://sprinfotaulu.fi';
+  const email =
+    localStorage.getItem("authenticatedEmail") || "Tuntematon käyttäjä";
+  const API_URL = process.env.REACT_APP_API_URL || "https://sprinfotaulu.fi";
 
   const [file, setFile] = useState(null);
   const [files, setFiles] = useState([]);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -36,7 +36,7 @@ function Dashboard({ onLogout, token }) {
   const [previewType, setPreviewType] = useState(null);
   const [storageStats, setStorageStats] = useState(null);
   const [deviceStatus, setDeviceStatus] = useState(null);
-  const [expiresAt, setExpiresAt] = useState('');
+  const [expiresAt, setExpiresAt] = useState("");
 
   useEffect(() => {
     if (!token) return;
@@ -50,44 +50,51 @@ function Dashboard({ onLogout, token }) {
   const fetchFiles = async () => {
     try {
       const res = await fetch(`${API_URL}/api/upload`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.status === 401 || res.status === 403) { onLogout(); return; }
+      if (res.status === 401 || res.status === 403) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       setFiles(Array.isArray(data) ? data : []);
     } catch {
-      setError('Tiedostojen haku epäonnistui');
+      setError("Tiedostojen haku epäonnistui");
     }
   };
 
   const fetchStorageStats = async () => {
     try {
       const res = await fetch(`${API_URL}/api/upload/storage/stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) setStorageStats(await res.json());
-    } catch { /* hiljainen virhe */ }
+    } catch {
+      /* hiljainen virhe */
+    }
   };
 
   const fetchDeviceStatus = async () => {
     try {
       const res = await fetch(`${API_URL}/api/heartbeat/status`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) setDeviceStatus(await res.json());
-    } catch { /* hiljainen virhe */ }
+    } catch {
+      /* hiljainen virhe */
+    }
   };
 
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
     if (!selected) return;
     setFile(selected);
-    setMessage('');
+    setMessage("");
     setError(null);
     setUploadProgress(0);
-    if (selected.type.startsWith('image/')) setPreviewType('image');
-    else if (selected.type === 'video/mp4') setPreviewType('video');
-    else if (selected.type === 'application/pdf') setPreviewType('pdf');
+    if (selected.type.startsWith("image/")) setPreviewType("image");
+    else if (selected.type === "video/mp4") setPreviewType("video");
+    else if (selected.type === "application/pdf") setPreviewType("pdf");
     const reader = new FileReader();
     reader.onload = (e) => setPreviewUrl(e.target.result);
     reader.readAsDataURL(selected);
@@ -97,12 +104,12 @@ function Dashboard({ onLogout, token }) {
     e.preventDefault();
     if (!file || !token) return;
     setIsUploading(true);
-    setMessage('');
+    setMessage("");
     setError(null);
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('uploadedBy', email);
-    if (expiresAt) formData.append('expiresAt', expiresAt);
+    formData.append("file", file);
+    formData.append("uploadedBy", email);
+    if (expiresAt) formData.append("expiresAt", expiresAt);
     const xhr = new XMLHttpRequest();
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable)
@@ -111,64 +118,78 @@ function Dashboard({ onLogout, token }) {
     xhr.onload = () => {
       setIsUploading(false);
       if (xhr.status === 200 || xhr.status === 201) {
-        setMessage('✅ Tiedosto ladattu onnistuneesti!');
-        setFile(null); setPreviewUrl(null);
-        setPreviewType(null); setExpiresAt('');
+        setMessage("✅ Tiedosto ladattu onnistuneesti!");
+        setFile(null);
+        setPreviewUrl(null);
+        setPreviewType(null);
+        setExpiresAt("");
         setTimeout(() => setUploadProgress(0), 1000);
-        fetchFiles(); fetchStorageStats();
+        fetchFiles();
+        fetchStorageStats();
       } else {
-        setError('Lataus epäonnistui');
+        setError("Lataus epäonnistui");
         setUploadProgress(0);
       }
     };
     xhr.onerror = () => {
       setIsUploading(false);
-      setError('Yhteysvirhe palvelimeen');
+      setError("Yhteysvirhe palvelimeen");
     };
-    xhr.open('POST', `${API_URL}/api/upload`);
-    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.open("POST", `${API_URL}/api/upload`);
+    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.send(formData);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Haluatko varmasti poistaa tiedoston pysyvästi?')) return;
+    if (!window.confirm("Haluatko varmasti poistaa tiedoston pysyvästi?"))
+      return;
     try {
       const res = await fetch(`${API_URL}/api/upload/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Poisto epäonnistui');
-      setMessage('Tiedosto poistettu onnistuneesti');
-      fetchFiles(); fetchStorageStats();
-    } catch (err) { setError(`Poistovirhe: ${err.message}`); }
+      if (!res.ok) throw new Error("Poisto epäonnistui");
+      setMessage("Tiedosto poistettu onnistuneesti");
+      fetchFiles();
+      fetchStorageStats();
+    } catch (err) {
+      setError(`Poistovirhe: ${err.message}`);
+    }
   };
 
   const handleDownload = async (id, originalName) => {
     try {
       const res = await fetch(`${API_URL}/api/upload/download/${id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error(`Palvelinvirhe (${res.status})`);
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = originalName || 'tiedosto';
-      document.body.appendChild(a); a.click(); a.remove();
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = originalName || "tiedosto";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (err) { setError(`Lataus epäonnistui: ${err.message}`); }
+    } catch (err) {
+      setError(`Lataus epäonnistui: ${err.message}`);
+    }
   };
 
   const handleToggle = async (id) => {
     try {
       const res = await fetch(`${API_URL}/api/upload/${id}/toggle`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Tilan vaihto epäonnistui');
-      setFiles(prev => prev.map(f =>
-        f._id === id ? { ...f, isActive: !f.isActive } : f
-      ));
-    } catch (err) { setError(`Virhe: ${err.message}`); }
+      if (!res.ok) throw new Error("Tilan vaihto epäonnistui");
+      setFiles((prev) =>
+        prev.map((f) => (f._id === id ? { ...f, isActive: !f.isActive } : f)),
+      );
+    } catch (err) {
+      setError(`Virhe: ${err.message}`);
+    }
   };
 
   const handleDisplayTimeChange = async (id, seconds) => {
@@ -176,18 +197,20 @@ function Dashboard({ onLogout, token }) {
     if (isNaN(value) || value < 5 || value > 600) return;
     try {
       const res = await fetch(`${API_URL}/api/upload/${id}/display-time`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ displaySeconds: value })
+        body: JSON.stringify({ displaySeconds: value }),
       });
-      if (!res.ok) throw new Error('Päivitys epäonnistui');
-      setFiles(prev => prev.map(f =>
-        f._id === id ? { ...f, displaySeconds: value } : f
-      ));
-    } catch (err) { setError(`Virhe: ${err.message}`); }
+      if (!res.ok) throw new Error("Päivitys epäonnistui");
+      setFiles((prev) =>
+        prev.map((f) => (f._id === id ? { ...f, displaySeconds: value } : f)),
+      );
+    } catch (err) {
+      setError(`Virhe: ${err.message}`);
+    }
   };
 
   // ── Drag & Drop ───────────────────────────────────────
@@ -197,29 +220,29 @@ function Dashboard({ onLogout, token }) {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = files.findIndex(f => f._id === active.id);
-    const newIndex = files.findIndex(f => f._id === over.id);
+    const oldIndex = files.findIndex((f) => f._id === active.id);
+    const newIndex = files.findIndex((f) => f._id === over.id);
     const newFiles = arrayMove(files, oldIndex, newIndex);
 
     setFiles(newFiles);
 
     try {
       const res = await fetch(`${API_URL}/api/upload/reorder`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ orderedIds: newFiles.map(f => f._id) })
+        body: JSON.stringify({ orderedIds: newFiles.map((f) => f._id) }),
       });
-      if (!res.ok) throw new Error('Järjestyksen tallennus epäonnistui');
+      if (!res.ok) throw new Error("Järjestyksen tallennus epäonnistui");
     } catch (err) {
       setError(`Virhe: ${err.message}`);
       fetchFiles(); // Palauta alkuperäinen järjestys
@@ -230,7 +253,6 @@ function Dashboard({ onLogout, token }) {
   return (
     <div className="App">
       <div className="two-column">
-
         {/* OHJEPANEELI */}
         <div className="guide">
           <div className="panel">
@@ -251,8 +273,8 @@ function Dashboard({ onLogout, token }) {
               </li>
               <li>
                 Voit <strong>määrittää päivämäärän</strong>, jolloin tiedosto
-                poistetaan esityksestä automaattisesti.
-                Päivämäärätön tiedosto ei poistu automaattisesti.
+                poistetaan esityksestä automaattisesti. Päivämäärätön tiedosto
+                ei poistu automaattisesti.
               </li>
               <li>
                 Paina <strong>"Lataa tiedosto"</strong> -nappia – latauksen
@@ -260,7 +282,7 @@ function Dashboard({ onLogout, token }) {
                 heti latauksen jälkeen.
               </li>
               <li>
-                Tiedostot <strong>näkyvät infotaululla automaattisesti</strong>{' '}
+                Tiedostot <strong>näkyvät infotaululla automaattisesti</strong>{" "}
                 muutaman minuutin sisällä (Raspberry Pi -laitteella).
               </li>
               <li>
@@ -282,18 +304,18 @@ function Dashboard({ onLogout, token }) {
                 tiedostonimeä listassa.
               </li>
               <li>
-                <strong>Poista tiedosto</strong> pysyvästi painamalla{' '}
+                <strong>Poista tiedosto</strong> pysyvästi painamalla{" "}
                 <strong>"Poista"</strong>-nappia ja vahvistamalla poistaminen.
               </li>
               <br />
               {/* AI-AVUSTAJAN OHJEET */}
               <li>
-                <strong>✨ AI-sisältöapuri</strong> — luo valmis infotauluilmoitus
-                tekoälyn avulla ilman kuvankäsittelyohjelmaa:
-                <ul style={{ marginTop: '6px' }}>
+                <strong>✨ AI-sisältöapuri</strong> — luo valmis
+                infotauluilmoitus tekoälyn avulla ilman kuvankäsittelyohjelmaa:
+                <ul style={{ marginTop: "6px" }}>
                   <li>
-                    Avaa apuri painamalla <strong>"✨ AI-sisältöapuri"</strong> -nappia
-                    hallintapaneelin yläosassa.
+                    Avaa apuri painamalla <strong>"✨ AI-sisältöapuri"</strong>{" "}
+                    -nappia hallintapaneelin yläosassa.
                   </li>
                   <li>
                     Kuvaile haluamasi sisältö suomeksi tai valitse valmis
@@ -304,13 +326,13 @@ function Dashboard({ onLogout, token }) {
                     tekstin ja kehotteen automaattisesti.
                   </li>
                   <li>
-                    Muokkaa tekstikenttiä tarvittaessa ja valitse visuaalinen teema
-                    (punainen, tumma tai minimalistinen).
+                    Muokkaa tekstikenttiä tarvittaessa ja valitse visuaalinen
+                    teema (punainen, tumma tai minimalistinen).
                   </li>
                   <li>
-                    Paina <strong>"Lisää infotaululle"</strong> lähettääksesi sisällön
-                    suoraan näytölle, tai lataa se <strong>PNG-kuvana</strong> omalle
-                    koneellesi.
+                    Paina <strong>"Lisää infotaululle"</strong> lähettääksesi
+                    sisällön suoraan näytölle, tai lataa se{" "}
+                    <strong>PNG-kuvana</strong> omalle koneellesi.
                   </li>
                   <li>
                     Tarkista aina tekoälyn luoma sisältö ennen julkaisua —
@@ -321,11 +343,10 @@ function Dashboard({ onLogout, token }) {
 
               <br />
 
-
               <li>
                 <strong>Offline-tila:</strong> Jos infotaulu näkyy punaisena,
-                laite ei ole yhteydessä internetiin tai se ei ole päällä.
-                Esitys voi silti toimia paikallisella sisällöllä.
+                laite ei ole yhteydessä internetiin tai se ei ole päällä. Esitys
+                voi silti toimia paikallisella sisällöllä.
               </li>
               <li>
                 <strong>Ongelmatilanteissa</strong> ota yhteyttä järjestelmän
@@ -341,18 +362,24 @@ function Dashboard({ onLogout, token }) {
           <div className="panel">
             <h2 className="panel-title">
               Hallintapaneeli
-              <span style={{
-                fontSize: '0.8rem',
-                fontWeight: '400',
-                color: '#64748b',
-                marginLeft: '8px'
-              }}>
-             {/*   ({files.filter(f => f.isActive !== false).length} aktiivista) */}
+              <span
+                style={{
+                  fontSize: "0.8rem",
+                  fontWeight: "400",
+                  color: "#64748b",
+                  marginLeft: "8px",
+                }}
+              >
+                {/*   ({files.filter(f => f.isActive !== false).length} aktiivista) */}
               </span>
             </h2>
 
             <br />
-              <AiAssistant token={token} apiUrl={API_URL}  onUploadSuccess={fetchFiles} />
+            <AiAssistant
+              token={token}
+              apiUrl={API_URL}
+              onUploadSuccess={fetchFiles}
+            />
             <br />
 
             <FileUploadForm
@@ -384,8 +411,8 @@ function Dashboard({ onLogout, token }) {
                 <table className="file-table">
                   <thead>
                     <tr>
-                      <th style={{ width: '32px' }}></th>
-                      <th style={{ width: '28px' }}>#</th>
+                      <th style={{ width: "32px" }}></th>
+                      <th style={{ width: "28px" }}>#</th>
                       <th>Nimi</th>
                       <th>Lataaja | Päivä</th>
                       <th>Aika | Tila</th>
@@ -394,18 +421,21 @@ function Dashboard({ onLogout, token }) {
                     </tr>
                   </thead>
                   <SortableContext
-                    items={files.map(f => f._id)}
+                    items={files.map((f) => f._id)}
                     strategy={verticalListSortingStrategy}
                   >
                     <tbody>
                       {files.length === 0 ? (
                         <tr>
-                          <td colSpan="7" style={{
-                            textAlign: 'center',
-                            padding: '2rem',
-                            color: '#94a3b8',
-                            fontStyle: 'italic'
-                          }}>
+                          <td
+                            colSpan="7"
+                            style={{
+                              textAlign: "center",
+                              padding: "2rem",
+                              color: "#94a3b8",
+                              fontStyle: "italic",
+                            }}
+                          >
                             Ei tiedostoja — lataa ensimmäinen tiedosto yllä
                           </td>
                         </tr>
@@ -428,7 +458,7 @@ function Dashboard({ onLogout, token }) {
               </DndContext>
             </div>
 
-            <p style={{ marginTop: '1.5rem' }}>
+            <p style={{ marginTop: "1.5rem" }}>
               Kirjautuneena: <strong>{email}</strong>
             </p>
             <button className="logout-btn" onClick={onLogout}>
@@ -436,7 +466,6 @@ function Dashboard({ onLogout, token }) {
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );

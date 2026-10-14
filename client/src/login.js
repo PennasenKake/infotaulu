@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export default function Login({
   email,
@@ -7,35 +7,57 @@ export default function Login({
   setOtp,
   generateOtp,
   verifyOtp,
-  isGenerating,     
-  isVerifying, 
+  isGenerating,
+  isVerifying,
   response,
   isLoading,
-  isRateLimited,          
-  setIsRateLimited        
+  isRateLimited,
+  setIsRateLimited,
 }) {
   return (
     <div className="App">
       <div className="two-column sidebar">
-        
         {/* OHJEPANEELI */}
         <div className="guide">
           <div className="panel" aria-labelledby="guide-title">
-            <h2 className="panel-title" id="guide-title">Ohjeet</h2>
+            <h2 className="panel-title" id="guide-title">
+              Ohjeet
+            </h2>
             <ul>
-                <li><strong>Kirjaudu sisään</strong> saadaksesi muokkausoikeudet.</li>
-                <li><strong>Vain valtuutetut käyttäjät</strong> voivat ladata tiedostoja.</li>
-                <li>Kirjoita <strong>sähköpostiosoitteesi</strong> alla olevaan kenttään.</li>
-                <li>Paina <strong>“Luo OTP”</strong>-nappia – saat 6-numeroisen kertakäyttökoodin sähköpostiisi (tarkista myös roskaposti-kansio).</li>
-                <li>Kopioi koodi sähköpostista ja liimaa se <strong>“Kertakäyttökoodi”</strong>-kenttään tällä sivulla.</li>
-                <li>Paina <strong>“Vahvista”</strong>-nappia – hallintanäkymä avautuu automaattisesti.</li>
-                <li>Jos saat virheilmoituksen, tarkista että:
-                  <ul>
-                    <li>sähköposti on whitelistalla (kysy ylläpidolta jos epäilet)</li>
-                    <li>koodi on syötetty oikein (6 numeroa)</li>
-                    <li>koodi ei ole vanhentunut (voimassa 5 minuuttia)</li>
-                  </ul>
-                </li>
+              <li>
+                <strong>Kirjaudu sisään</strong> saadaksesi muokkausoikeudet.
+              </li>
+              <li>
+                <strong>Vain valtuutetut käyttäjät</strong> voivat ladata
+                tiedostoja.
+              </li>
+              <li>
+                Kirjoita <strong>sähköpostiosoitteesi</strong> alla olevaan
+                kenttään.
+              </li>
+              <li>
+                Paina <strong>“Luo OTP”</strong>-nappia – saat 6-numeroisen
+                kertakäyttökoodin sähköpostiisi (tarkista myös
+                roskaposti-kansio).
+              </li>
+              <li>
+                Kopioi koodi sähköpostista ja liimaa se{" "}
+                <strong>“Kertakäyttökoodi”</strong>-kenttään tällä sivulla.
+              </li>
+              <li>
+                Paina <strong>“Vahvista”</strong>-nappia – hallintanäkymä
+                avautuu automaattisesti.
+              </li>
+              <li>
+                Jos saat virheilmoituksen, tarkista että:
+                <ul>
+                  <li>
+                    sähköposti on whitelistalla (kysy ylläpidolta jos epäilet)
+                  </li>
+                  <li>koodi on syötetty oikein (6 numeroa)</li>
+                  <li>koodi ei ole vanhentunut (voimassa 5 minuuttia)</li>
+                </ul>
+              </li>
             </ul>
           </div>
         </div>
@@ -43,7 +65,9 @@ export default function Login({
         {/* KIRJAUTUMISPANEELI */}
         <div className="login">
           <div className="panel" aria-labelledby="login-title">
-            <h2 className="panel-title" id="login-title">Kirjaudu</h2>
+            <h2 className="panel-title" id="login-title">
+              Kirjaudu
+            </h2>
 
             <input
               type="email"
@@ -53,28 +77,35 @@ export default function Login({
               disabled={isLoading}
             />
 
-            <button onClick={generateOtp} disabled={isGenerating || isRateLimited} >
-              { isRateLimited ? 'Odota 10 minuuttia...' : isGenerating ? 'Lähetetään...' : 'Luo Kertakäyttökoodi'}
+            <button
+              onClick={generateOtp}
+              disabled={isGenerating || isRateLimited}
+            >
+              {isRateLimited
+                ? "Odota 10 minuuttia..."
+                : isGenerating
+                  ? "Lähetetään..."
+                  : "Luo Kertakäyttökoodi"}
             </button>
 
             {response && (
-              <p className={`response-message ${response.type === 'error' ? 'error-text' : 'success-text'}`}>
+              <p
+                className={`response-message ${response.type === "error" ? "error-text" : "success-text"}`}
+              >
                 {response.text}
               </p>
-
             )}
 
-            <input 
-              type="text" 
-              placeholder="Kertakäyttökoodi" 
-              value={otp} 
-              onChange={(e) => setOtp(e.target.value)} 
-              disabled={isLoading} 
+            <input
+              type="text"
+              placeholder="Kertakäyttökoodi"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              disabled={isLoading}
             />
 
-
-            <button onClick={verifyOtp} disabled={isVerifying} >
-              {isVerifying ? 'Tarkistetaan...' : 'Vahvista'}
+            <button onClick={verifyOtp} disabled={isVerifying}>
+              {isVerifying ? "Tarkistetaan..." : "Vahvista"}
             </button>
 
             <p className="help-text">
